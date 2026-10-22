@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>현장 조치 보고서 - TS-2026-0002</title>
+<!-- TS WorkBench 템플릿: 중괄호 두 겹으로 감싼 이름 자리에 업무 카드 값이 들어갑니다. 회사 양식에 맞게 자유롭게 고치세요. -->
+<style>
+  @page { size: A4; margin: 14mm; }
+  body { font-family: "맑은 고딕", "Malgun Gothic", sans-serif; font-size: 10.5pt; color: #222; margin: 0 auto; max-width: 820px; padding: 16px; }
+  header { border-bottom: 3px solid #BC8F8F; padding-bottom: 8px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; }
+  h1 { font-size: 18pt; margin: 0; }
+  .meta { color: #666; font-size: 9pt; text-align: right; }
+  h2 { font-size: 12pt; margin: 18px 0 6px; padding-left: 8px; border-left: 4px solid #BC8F8F; }
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  th, td { border: 1px solid #ccc; padding: 5px 7px; vertical-align: top; text-align: left; }
+  th { background: #f2eded; width: 16%; white-space: nowrap; }
+  thead th { width: auto; }
+  .muted { color: #999; }
+  figure { display: inline-block; width: 48%; margin: 0 1% 10px 0; vertical-align: top; page-break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid #ccc; }
+  figcaption { font-size: 9pt; color: #555; text-align: center; }
+  .sign { margin-top: 24px; }
+  .sign td { height: 48px; text-align: center; }
+  ul { margin: 4px 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>현장 조치 보고서</h1>
+    <div>카메라 연결 끊김 후 자동 재연결 안 됨</div>
+  </div>
+  <div class="meta">문서번호 TS-2026-0002<br>예시테크 TS팀 · 홍길동<br>작성 2026-10-22 11:09</div>
+</header>
+
+<h2>1. 개요</h2>
+<table>
+  <tr><th>고객사</th><td>B사</td><th>사이트/라인</th><td>청주 1공장</td></tr>
+  <tr><th>설비</th><td>롤프레스 1호기</td><th>대상 시스템</th><td>카메라</td></tr>
+  <tr><th>업무 유형</th><td>프로그램 수정</td><th>진행 상태</th><td>완료</td></tr>
+  <tr><th>접수</th><td>2026-10-15 14:10</td><th>완료</th><td>2026-10-17 18:00</td></tr>
+  <tr><th>요청자</th><td>B사 설비팀 이OO 매니저</td><th>작업 시간</th><td>13.5 시간</td></tr>
+</table>
+
+<h2>2. 현상</h2>
+<table>
+  <tr><th>현상</th><td>주 1~2회 카메라 연결이 끊기면 검사 프로그램이 &#39;카메라 없음&#39; 상태로 멈춤. 프로그램을 재시작해야 복구됨.</td></tr>
+  <tr><th>발생 시점·빈도</th><td>최근 2주간 3회 (10/3, 10/9, 10/15). 모두 설비 정지 후 재가동 직후</td></tr>
+  <tr><th>재현 조건</th><td>사무실에서 카메라 LAN 케이블을 뽑았다 꽂으면 100% 재현. 재연결 시도 로그가 1회만 남고 이후 시도 없음.</td></tr>
+  <tr><th>영향</th><td>발생 시 약 10분 라인 정지 (작업자가 프로그램 재시작)</td></tr>
+</table>
+
+<h2>3. 원인</h2>
+<table>
+  <tr><th>원인</th><td>카메라 끊김 이벤트에서 재연결 타이머를 한 번만 시작하고, 첫 재연결이 실패하면 타이머를 다시 켜지 않음. 재가동 직후에는 카메라 전원이 늦게 올라와 첫 시도가 항상 실패.</td></tr>
+  <tr><th>근거</th><td>검사 로그: 10/15 06:02:11 Disconnected → 06:02:16 Reconnect failed (Device not found) → 이후 재시도 없음<br>카메라 전원 인가 후 네트워크 응답까지 약 25초 (측정)</td></tr>
+</table>
+
+<h2>4. 조치 내용</h2>
+<table>
+  <tr><th>하드웨어</th><td><span class="muted">-</span></td></tr>
+  <tr><th>소프트웨어</th><td>재연결을 5초 간격으로 최대 무제한 재시도하도록 수정, 재시도 중 화면에 &#39;카메라 재연결 중 (n회)&#39; 표시.<br>재연결 성공 시 검사 자동 재개.</td></tr>
+  <tr><th>변경 내역</th><td>CameraManager.cs : OnDisconnected() 재시도 루프 추가<br>버전 2.4.1 → 2.4.2<br>배포 파일: \\fileserver\TS\B사\배포\v2.4.2.zip / 롤백: v2.4.1.zip</td></tr>
+</table>
+
+<h2>5. 검증 결과 및 재발 방지</h2>
+<table>
+  <tr><th>검증 결과</th><td>사무실: LAN 분리 30회 → 모두 자동 복구 (평균 27초)<br>현장: 10/17 설비 정지&#183;재가동 3회 → 모두 자동 복구 확인</td></tr>
+  <tr><th>재발 방지</th><td>같은 카메라 모듈을 쓰는 C사 라미 설비 프로그램에도 같은 수정 반영 예정 (별도 업무로 등록)</td></tr>
+  <tr><th>고객 전달 사항</th><td>재연결 중에는 검사가 멈추므로 화면 메시지가 30초 이상 지속되면 연락 요청</td></tr>
+  <tr><th>재방문</th><td>불필요</td></tr>
+</table>
+
+<h2>6. 작업 이력</h2>
+<table><thead><tr><th>시작</th><th>종료</th><th>구분</th><th>시간(h)</th><th>내용</th></tr></thead><tbody><tr><td>2026-10-15 14:10</td><td></td><td>연락 수신</td><td></td><td>B사 이OO 매니저 메일: 카메라 끊김 재발, 근본 해결 요청</td></tr><tr><td>2026-10-15 14:30</td><td>2026-10-15 17:30</td><td>사무실 분석</td><td>3</td><td>로그 분석, 사무실 재현 성공</td></tr><tr><td>2026-10-16 09:00</td><td>2026-10-16 15:00</td><td>사무실 분석</td><td>6</td><td>재연결 로직 수정&#183;사무실 테스트 30회</td></tr><tr><td>2026-10-17 13:00</td><td>2026-10-17 17:30</td><td>현장 작업</td><td>4.5</td><td>v2.4.2 배포, 재가동 시험 3회 입회</td></tr><tr><td>2026-10-17 18:00</td><td></td><td>상태 변경</td><td></td><td>상태: 검증(모니터링) → 완료</td></tr></tbody></table>
+
+<h2>7. 사진</h2>
+<p class="muted">첨부 사진 없음</p>
+
+<table class="sign">
+  <tr><th>작성자</th><th>검토</th><th>고객 확인</th></tr>
+  <tr><td>홍길동</td><td></td><td></td></tr>
+</table>
+</body>
+</html>

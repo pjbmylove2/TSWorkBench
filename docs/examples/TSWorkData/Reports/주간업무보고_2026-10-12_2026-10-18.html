@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>주간 업무 보고 2026-10-12 ~ 2026-10-18</title>
+<style>
+  @page { size: A4 landscape; margin: 12mm; }
+  body { font-family: "맑은 고딕", "Malgun Gothic", sans-serif; font-size: 10pt; color: #222; margin: 0 auto; max-width: 1100px; padding: 16px; }
+  header { border-bottom: 3px solid #BC8F8F; padding-bottom: 8px; margin-bottom: 12px; }
+  h1 { font-size: 17pt; margin: 0 0 4px; }
+  .meta { color: #666; font-size: 9pt; }
+  h2 { font-size: 12pt; margin: 18px 0 6px; padding-left: 8px; border-left: 4px solid #BC8F8F; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { background: #f2eded; white-space: nowrap; }
+  tbody tr:nth-child(even) { background: #fafafa; }
+  .muted { color: #999; }
+  ul { margin: 4px 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>주간 업무 보고</h1>
+  <div class="meta">기간 2026-10-12 ~ 2026-10-18 · 예시테크 TS팀 홍길동 · 작성 2026-10-22 11:09</div>
+</header>
+
+<h2>요약</h2>
+<ul><li>접수 3건, 완료 2건</li><li>현재 진행 중 1건 (기한 지남 1건)</li><li>평균 처리 기간 1.7일 (기간 내 완료 기준)</li><li>현장 작업 10.5시간 &#183; 이동 2시간 &#183; 원격/분석 10시간</li><li>유형별: 프로그램 수정 1, 현장 출동 1, 후속 확인 1</li></ul>
+
+<h2>완료한 업무 (2건)</h2>
+<table><thead><tr><th>ID</th><th>완료일</th><th>위치</th><th>제목</th><th>원인</th><th>조치</th></tr></thead><tbody><tr><td>TS-2026-0001</td><td>2026-10-14</td><td>A사 / 오창 2공장 2라인 / 노칭 2호기</td><td>2라인 OCR 오판정 증가 (조명 열화)</td><td>OCR 조명(바 조명 2개 중 우측) 밝기 열화. 사용 시간 약 21,000시간.</td><td>우측 바 조명 교체 (모델 LDL-130X15, S/N 신품 B2610-0371)</td></tr><tr><td>TS-2026-0002</td><td>2026-10-17</td><td>B사 / 청주 1공장 / 롤프레스 1호기</td><td>카메라 연결 끊김 후 자동 재연결 안 됨</td><td>카메라 끊김 이벤트에서 재연결 타이머를 한 번만 시작하고, 첫 재연결이 실패하면 타이머를 다시 켜지 않음. …</td><td>재연결을 5초 간격으로 최대 무제한 재시도하도록 수정, 재시도 중 화면에 &#39;카메라 재연결 중 (n회)&#39; 표시…</td></tr></tbody></table>
+
+<h2>진행 중인 업무 (1건)</h2>
+<table><thead><tr><th>ID</th><th>상태</th><th>우선</th><th>기한</th><th>위치</th><th>제목</th><th>다음 할 일/현재 상황</th></tr></thead><tbody><tr><td>TS-2026-0003</td><td>접수</td><td>보통</td><td>2026-10-21</td><td>A사 / 오창 2공장 2라인 / 노칭 2호기</td><td>[모니터링] 2라인 OCR 오판정 증가 (조명 열화)</td><td>TS-2026-0001 완료 시 자동 생성</td></tr></tbody></table>
+
+<h2>기한이 지난 업무</h2>
+<table><thead><tr><th>ID</th><th>기한</th><th>위치</th><th>제목</th></tr></thead><tbody><tr><td>TS-2026-0003</td><td>2026-10-21</td><td>A사 / 오창 2공장 2라인 / 노칭 2호기</td><td>[모니터링] 2라인 OCR 오판정 증가 (조명 열화)</td></tr></tbody></table>
+
+<h2>다음 기간 예정 (2026-10-19 ~ 2026-10-25)</h2>
+<table><thead><tr><th>ID</th><th>기한</th><th>유형</th><th>위치</th><th>제목</th></tr></thead><tbody><tr><td>TS-2026-0003</td><td>2026-10-21</td><td>후속 확인</td><td>A사 / 오창 2공장 2라인 / 노칭 2호기</td><td>[모니터링] 2라인 OCR 오판정 증가 (조명 열화)</td></tr></tbody></table>
+
+<h2>반복 이슈</h2>
+<table><thead><tr><th>구분</th><th>상위 항목 (건수)</th></tr></thead><tbody><tr><td>고객사</td><td>A사 (2), B사 (1)</td></tr><tr><td>설비</td><td>노칭 2호기 (2), 롤프레스 1호기 (1)</td></tr><tr><td>대상 시스템</td><td>OCR 검사 (2), 카메라 (1)</td></tr></tbody></table>
+</body>
+</html>

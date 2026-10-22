@@ -1,0 +1,43 @@
+{
+  "Id": "TS-2026-0003",
+  "Title": "[모니터링] 2라인 OCR 오판정 증가 (조명 열화)",
+  "Type": "FollowUp",
+  "Status": "Received",
+  "Priority": "Normal",
+  "Customer": "A사",
+  "Site": "오창 2공장 2라인",
+  "Equipment": "노칭 2호기",
+  "TargetSystem": "OCR 검사",
+  "Tags": "조명, 오판정",
+  "Requester": "A사 생산기술 김OO 책임 (010-0000-0000)",
+  "ReceivedAt": "2026-10-14T16:20:00",
+  "DueDate": "2026-10-21T00:00:00",
+  "CompletedAt": null,
+  "Symptom": "TS-2026-0001 조치 후 7일간 재발 여부 확인",
+  "SymptomWhen": "",
+  "Reproduction": "",
+  "Impact": "",
+  "Cause": "",
+  "CauseEvidence": "",
+  "ActionHardware": "",
+  "ActionSoftware": "",
+  "ChangedFiles": "",
+  "Verification": "",
+  "Prevention": "",
+  "CustomerNote": "",
+  "NeedsRevisit": false,
+  "RevisitDate": null,
+  "ParentId": "TS-2026-0001",
+  "ImportedFrom": "",
+  "Timeline": [
+    { "Start": "2026-10-14T16:20:00", "End": null, "Kind": "Note", "Text": "TS-2026-0001 완료 시 자동 생성" }
+  ],
+  "Checklist": [
+    { "Text": "재발 여부 확인 (고객 문의·로그)", "Done": false },
+    { "Text": "판정 지표 확인", "Done": false },
+    { "Text": "종료 또는 재오픈 판단", "Done": false }
+  ],
+  "Attachments": [],
+  "CreatedAt": "2026-10-14T16:20:00",
+  "UpdatedAt": "2026-10-14T16:20:00"
+}

@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>현장 조치 보고서 - TS-2026-0001</title>
+<!-- TS WorkBench 템플릿: 중괄호 두 겹으로 감싼 이름 자리에 업무 카드 값이 들어갑니다. 회사 양식에 맞게 자유롭게 고치세요. -->
+<style>
+  @page { size: A4; margin: 14mm; }
+  body { font-family: "맑은 고딕", "Malgun Gothic", sans-serif; font-size: 10.5pt; color: #222; margin: 0 auto; max-width: 820px; padding: 16px; }
+  header { border-bottom: 3px solid #BC8F8F; padding-bottom: 8px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; }
+  h1 { font-size: 18pt; margin: 0; }
+  .meta { color: #666; font-size: 9pt; text-align: right; }
+  h2 { font-size: 12pt; margin: 18px 0 6px; padding-left: 8px; border-left: 4px solid #BC8F8F; }
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  th, td { border: 1px solid #ccc; padding: 5px 7px; vertical-align: top; text-align: left; }
+  th { background: #f2eded; width: 16%; white-space: nowrap; }
+  thead th { width: auto; }
+  .muted { color: #999; }
+  figure { display: inline-block; width: 48%; margin: 0 1% 10px 0; vertical-align: top; page-break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid #ccc; }
+  figcaption { font-size: 9pt; color: #555; text-align: center; }
+  .sign { margin-top: 24px; }
+  .sign td { height: 48px; text-align: center; }
+  ul { margin: 4px 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>현장 조치 보고서</h1>
+    <div>2라인 OCR 오판정 증가 (조명 열화)</div>
+  </div>
+  <div class="meta">문서번호 TS-2026-0001<br>예시테크 TS팀 · 홍길동<br>작성 2026-10-22 11:09</div>
+</header>
+
+<h2>1. 개요</h2>
+<table>
+  <tr><th>고객사</th><td>A사</td><th>사이트/라인</th><td>오창 2공장 2라인</td></tr>
+  <tr><th>설비</th><td>노칭 2호기</td><th>대상 시스템</th><td>OCR 검사</td></tr>
+  <tr><th>업무 유형</th><td>현장 출동</td><th>진행 상태</th><td>완료</td></tr>
+  <tr><th>접수</th><td>2026-10-13 08:40</td><th>완료</th><td>2026-10-14 16:20</td></tr>
+  <tr><th>요청자</th><td>A사 생산기술 김OO 책임 (010-0000-0000)</td><th>작업 시간</th><td>9 시간</td></tr>
+</table>
+
+<h2>2. 현상</h2>
+<table>
+  <tr><th>현상</th><td>2라인 노칭 2호기 OCR 검사에서 정상 셀을 NG로 판정하는 비율이 증가.<br>평소 0.1% → 10/12 야간조부터 2.3%. 같은 라인 1호기는 정상.</td></tr>
+  <tr><th>발생 시점·빈도</th><td>10/12 야간조(22시)부터 지속, 시간당 약 40건</td></tr>
+  <tr><th>재현 조건</th><td>2호기에서만 발생. 같은 셀을 1호기로 돌리면 OK. 검사 이미지가 전체적으로 어둡고 문자 가장자리가 흐림.</td></tr>
+  <tr><th>영향</th><td>NG 셀 재검 작업으로 라인 속도 80% 운전. 불량 유출은 없음.</td></tr>
+</table>
+
+<h2>3. 원인</h2>
+<table>
+  <tr><th>원인</th><td>OCR 조명(바 조명 2개 중 우측) 밝기 열화. 사용 시간 약 21,000시간.</td></tr>
+  <tr><th>근거</th><td>1) 조명 컨트롤러 출력은 정상(설정 180)인데 측정 휘도가 좌측 대비 62%<br>2) 우측 조명을 1호기 예비품으로 임시 교체하자 NG 비율 0.1%로 즉시 복귀<br>3) 5 Why: 오판정 ← 이미지 어두움 ← 우측 조명 휘도 저하 ← LED 수명 ← 교체 주기 관리 없음</td></tr>
+</table>
+
+<h2>4. 조치 내용</h2>
+<table>
+  <tr><th>하드웨어</th><td>우측 바 조명 교체 (모델 LDL-130X15, S/N 신품 B2610-0371)<br>좌측 조명도 같은 시기 설치분이라 함께 교체 (S/N B2610-0372)</td></tr>
+  <tr><th>소프트웨어</th><td>조명 교체 후 노출 시간 재조정 1,200us → 1,050us (이미지 평균 밝기 128 맞춤)</td></tr>
+  <tr><th>변경 내역</th><td>Recipe\NOTCHING2_OCR.json : ExposureTime 1200 → 1050<br>백업: D:\Backup\20261014_NOTCHING2_OCR.json</td></tr>
+</table>
+
+<h2>5. 검증 결과 및 재발 방지</h2>
+<table>
+  <tr><th>검증 결과</th><td>교체 후 3시간(약 9,000셀) 생산 동안 NG 비율 0.08%. 오판정 이미지 0건. 고객 입회 확인 완료.</td></tr>
+  <tr><th>재발 방지</th><td>1) 조명 사용 시간 15,000시간 도달 시 교체하도록 정기 점검 체크리스트에 추가<br>2) 같은 시기 설치된 1라인&#183;3라인 조명 휘도 측정 → 정기 점검 때 확인</td></tr>
+  <tr><th>고객 전달 사항</th><td>교체한 열화 조명 2개는 회수함. 1주일간 NG 비율 추이를 공유 부탁드림.</td></tr>
+  <tr><th>재방문</th><td>불필요</td></tr>
+</table>
+
+<h2>6. 작업 이력</h2>
+<table><thead><tr><th>시작</th><th>종료</th><th>구분</th><th>시간(h)</th><th>내용</th></tr></thead><tbody><tr><td>2026-10-13 08:40</td><td></td><td>연락 수신</td><td></td><td>A사 김OO 책임 전화: 2호기 OCR NG 증가</td></tr><tr><td>2026-10-13 09:00</td><td>2026-10-13 10:00</td><td>원격 작업</td><td>1</td><td>원격으로 검사 이미지&#183;NG 이력 확인 → 이미지 밝기 저하 확인, 조명 의심</td></tr><tr><td>2026-10-13 10:05</td><td></td><td>상태 변경</td><td></td><td>상태: 접수 → 분석</td></tr><tr><td>2026-10-14 07:30</td><td>2026-10-14 09:30</td><td>이동</td><td>2</td><td>사무실 → 오창 (예비 조명 2개 지참)</td></tr><tr><td>2026-10-14 09:30</td><td>2026-10-14 15:30</td><td>현장 작업</td><td>6</td><td>휘도 측정, 조명 교체, 노출 재조정, 3시간 시험 생산 입회</td></tr><tr><td>2026-10-14 09:40</td><td></td><td>상태 변경</td><td></td><td>상태: 분석 → 조치 중</td></tr><tr><td>2026-10-14 13:00</td><td></td><td>상태 변경</td><td></td><td>상태: 조치 중 → 검증(모니터링)</td></tr><tr><td>2026-10-14 16:20</td><td></td><td>상태 변경</td><td></td><td>상태: 검증(모니터링) → 완료</td></tr></tbody></table>
+
+<h2>7. 사진</h2>
+<p class="muted">첨부 사진 없음</p>
+
+<table class="sign">
+  <tr><th>작성자</th><th>검토</th><th>고객 확인</th></tr>
+  <tr><td>홍길동</td><td></td><td></td></tr>
+</table>
+</body>
+</html>

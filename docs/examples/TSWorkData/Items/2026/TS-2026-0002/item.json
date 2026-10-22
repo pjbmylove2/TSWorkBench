@@ -1,0 +1,53 @@
+{
+  "Id": "TS-2026-0002",
+  "Title": "카메라 연결 끊김 후 자동 재연결 안 됨",
+  "Type": "ProgramChange",
+  "Status": "Done",
+  "Priority": "Urgent",
+  "Customer": "B사",
+  "Site": "청주 1공장",
+  "Equipment": "롤프레스 1호기",
+  "TargetSystem": "카메라",
+  "Tags": "재연결, 통신",
+  "Requester": "B사 설비팀 이OO 매니저",
+  "ReceivedAt": "2026-10-15T14:10:00",
+  "DueDate": "2026-10-17T00:00:00",
+  "CompletedAt": "2026-10-17T18:00:00",
+  "Symptom": "주 1~2회 카메라 연결이 끊기면 검사 프로그램이 '카메라 없음' 상태로 멈춤. 프로그램을 재시작해야 복구됨.",
+  "SymptomWhen": "최근 2주간 3회 (10/3, 10/9, 10/15). 모두 설비 정지 후 재가동 직후",
+  "Reproduction": "사무실에서 카메라 LAN 케이블을 뽑았다 꽂으면 100% 재현. 재연결 시도 로그가 1회만 남고 이후 시도 없음.",
+  "Impact": "발생 시 약 10분 라인 정지 (작업자가 프로그램 재시작)",
+  "Cause": "카메라 끊김 이벤트에서 재연결 타이머를 한 번만 시작하고, 첫 재연결이 실패하면 타이머를 다시 켜지 않음. 재가동 직후에는 카메라 전원이 늦게 올라와 첫 시도가 항상 실패.",
+  "CauseEvidence": "검사 로그: 10/15 06:02:11 Disconnected → 06:02:16 Reconnect failed (Device not found) → 이후 재시도 없음\n카메라 전원 인가 후 네트워크 응답까지 약 25초 (측정)",
+  "ActionHardware": "",
+  "ActionSoftware": "재연결을 5초 간격으로 최대 무제한 재시도하도록 수정, 재시도 중 화면에 '카메라 재연결 중 (n회)' 표시.\n재연결 성공 시 검사 자동 재개.",
+  "ChangedFiles": "CameraManager.cs : OnDisconnected() 재시도 루프 추가\n버전 2.4.1 → 2.4.2\n배포 파일: \\\\fileserver\\TS\\B사\\배포\\v2.4.2.zip / 롤백: v2.4.1.zip",
+  "Verification": "사무실: LAN 분리 30회 → 모두 자동 복구 (평균 27초)\n현장: 10/17 설비 정지·재가동 3회 → 모두 자동 복구 확인",
+  "Prevention": "같은 카메라 모듈을 쓰는 C사 라미 설비 프로그램에도 같은 수정 반영 예정 (별도 업무로 등록)",
+  "CustomerNote": "재연결 중에는 검사가 멈추므로 화면 메시지가 30초 이상 지속되면 연락 요청",
+  "NeedsRevisit": false,
+  "RevisitDate": null,
+  "ParentId": "",
+  "ImportedFrom": "",
+  "Timeline": [
+    { "Start": "2026-10-15T14:10:00", "End": null, "Kind": "Contact", "Text": "B사 이OO 매니저 메일: 카메라 끊김 재발, 근본 해결 요청" },
+    { "Start": "2026-10-15T14:30:00", "End": "2026-10-15T17:30:00", "Kind": "Analysis", "Text": "로그 분석, 사무실 재현 성공" },
+    { "Start": "2026-10-16T09:00:00", "End": "2026-10-16T15:00:00", "Kind": "Analysis", "Text": "재연결 로직 수정·사무실 테스트 30회" },
+    { "Start": "2026-10-17T13:00:00", "End": "2026-10-17T17:30:00", "Kind": "OnSite", "Text": "v2.4.2 배포, 재가동 시험 3회 입회" },
+    { "Start": "2026-10-17T18:00:00", "End": null, "Kind": "StatusChange", "Text": "상태: 검증(모니터링) → 완료" }
+  ],
+  "Checklist": [
+    { "Text": "변경 전 소스·설정 백업 (커밋/태그)", "Done": true },
+    { "Text": "변경 범위·영향 검토", "Done": true },
+    { "Text": "사무실 테스트 (재현 데이터로 확인)", "Done": true },
+    { "Text": "버전 번호 갱신", "Done": true },
+    { "Text": "배포 파일·롤백 파일 준비", "Done": true },
+    { "Text": "현장 적용 후 동작 확인", "Done": true },
+    { "Text": "변경 이력 기록 (파일·버전·설정 전→후)", "Done": true }
+  ],
+  "Attachments": [
+    { "Name": "B사 로그 원본", "Path": "\\\\fileserver\\TS\\B사\\로그\\20261015", "Copied": false, "Note": "폴더" }
+  ],
+  "CreatedAt": "2026-10-15T14:12:00",
+  "UpdatedAt": "2026-10-17T18:00:00"
+}

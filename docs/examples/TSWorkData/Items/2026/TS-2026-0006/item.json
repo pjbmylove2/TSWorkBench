@@ -1,0 +1,43 @@
+{
+  "Id": "TS-2026-0006",
+  "Title": "검사 이미지 보관 기간 변경 가능 여부 문의",
+  "Type": "Inquiry",
+  "Status": "Received",
+  "Priority": "Low",
+  "Customer": "B사",
+  "Site": "청주 1공장",
+  "Equipment": "",
+  "TargetSystem": "PC·OS",
+  "Tags": "설정, 디스크",
+  "Requester": "B사 IT팀 최OO",
+  "ReceivedAt": "2026-10-22T09:05:00",
+  "DueDate": "2026-10-24T00:00:00",
+  "CompletedAt": null,
+  "Symptom": "NG 이미지는 1년, OK 이미지는 30일만 보관하도록 설정할 수 있는지 문의",
+  "SymptomWhen": "",
+  "Reproduction": "",
+  "Impact": "",
+  "Cause": "",
+  "CauseEvidence": "",
+  "ActionHardware": "",
+  "ActionSoftware": "",
+  "ChangedFiles": "",
+  "Verification": "",
+  "Prevention": "",
+  "CustomerNote": "",
+  "NeedsRevisit": false,
+  "RevisitDate": null,
+  "ParentId": "",
+  "ImportedFrom": "",
+  "Timeline": [
+    { "Start": "2026-10-22T09:05:00", "End": null, "Kind": "Contact", "Text": "메일 수신" }
+  ],
+  "Checklist": [
+    { "Text": "질문 내용 정리", "Done": true },
+    { "Text": "답변·근거 자료 전달", "Done": false },
+    { "Text": "지식베이스(FAQ) 등록 여부 판단", "Done": false }
+  ],
+  "Attachments": [],
+  "CreatedAt": "2026-10-22T09:06:00",
+  "UpdatedAt": "2026-10-22T09:06:00"
+}

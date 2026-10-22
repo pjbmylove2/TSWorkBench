@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>현장 조치 보고서 - {{Id}}</title>
+<!-- TS WorkBench 템플릿: 중괄호 두 겹으로 감싼 이름 자리에 업무 카드 값이 들어갑니다. 회사 양식에 맞게 자유롭게 고치세요. -->
+<style>
+  @page { size: A4; margin: 14mm; }
+  body { font-family: "맑은 고딕", "Malgun Gothic", sans-serif; font-size: 10.5pt; color: #222; margin: 0 auto; max-width: 820px; padding: 16px; }
+  header { border-bottom: 3px solid #BC8F8F; padding-bottom: 8px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; }
+  h1 { font-size: 18pt; margin: 0; }
+  .meta { color: #666; font-size: 9pt; text-align: right; }
+  h2 { font-size: 12pt; margin: 18px 0 6px; padding-left: 8px; border-left: 4px solid #BC8F8F; }
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  th, td { border: 1px solid #ccc; padding: 5px 7px; vertical-align: top; text-align: left; }
+  th { background: #f2eded; width: 16%; white-space: nowrap; }
+  thead th { width: auto; }
+  .muted { color: #999; }
+  figure { display: inline-block; width: 48%; margin: 0 1% 10px 0; vertical-align: top; page-break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid #ccc; }
+  figcaption { font-size: 9pt; color: #555; text-align: center; }
+  .sign { margin-top: 24px; }
+  .sign td { height: 48px; text-align: center; }
+  ul { margin: 4px 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>현장 조치 보고서</h1>
+    <div>{{Title}}</div>
+  </div>
+  <div class="meta">문서번호 {{Id}}<br>{{Company}} {{Department}} · {{Author}}<br>작성 {{GeneratedAt}}</div>
+</header>
+
+<h2>1. 개요</h2>
+<table>
+  <tr><th>고객사</th><td>{{Customer}}</td><th>사이트/라인</th><td>{{Site}}</td></tr>
+  <tr><th>설비</th><td>{{Equipment}}</td><th>대상 시스템</th><td>{{TargetSystem}}</td></tr>
+  <tr><th>업무 유형</th><td>{{Type}}</td><th>진행 상태</th><td>{{Status}}</td></tr>
+  <tr><th>접수</th><td>{{ReceivedAt}}</td><th>완료</th><td>{{CompletedAt}}</td></tr>
+  <tr><th>요청자</th><td>{{Requester}}</td><th>작업 시간</th><td>{{TotalHours}} 시간</td></tr>
+</table>
+
+<h2>2. 현상</h2>
+<table>
+  <tr><th>현상</th><td>{{Symptom}}</td></tr>
+  <tr><th>발생 시점·빈도</th><td>{{SymptomWhen}}</td></tr>
+  <tr><th>재현 조건</th><td>{{Reproduction}}</td></tr>
+  <tr><th>영향</th><td>{{Impact}}</td></tr>
+</table>
+
+<h2>3. 원인</h2>
+<table>
+  <tr><th>원인</th><td>{{Cause}}</td></tr>
+  <tr><th>근거</th><td>{{CauseEvidence}}</td></tr>
+</table>
+
+<h2>4. 조치 내용</h2>
+<table>
+  <tr><th>하드웨어</th><td>{{ActionHardware}}</td></tr>
+  <tr><th>소프트웨어</th><td>{{ActionSoftware}}</td></tr>
+  <tr><th>변경 내역</th><td>{{ChangedFiles}}</td></tr>
+</table>
+
+<h2>5. 검증 결과 및 재발 방지</h2>
+<table>
+  <tr><th>검증 결과</th><td>{{Verification}}</td></tr>
+  <tr><th>재발 방지</th><td>{{Prevention}}</td></tr>
+  <tr><th>고객 전달 사항</th><td>{{CustomerNote}}</td></tr>
+  <tr><th>재방문</th><td>{{Revisit}}</td></tr>
+</table>
+
+<h2>6. 작업 이력</h2>
+{{Timeline}}
+
+<h2>7. 사진</h2>
+{{Photos}}
+
+<table class="sign">
+  <tr><th>작성자</th><th>검토</th><th>고객 확인</th></tr>
+  <tr><td>{{Author}}</td><td></td><td></td></tr>
+</table>
+</body>
+</html>

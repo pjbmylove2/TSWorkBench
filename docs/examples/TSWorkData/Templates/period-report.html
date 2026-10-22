@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>{{ReportTitle}} {{Period}}</title>
+<style>
+  @page { size: A4 landscape; margin: 12mm; }
+  body { font-family: "맑은 고딕", "Malgun Gothic", sans-serif; font-size: 10pt; color: #222; margin: 0 auto; max-width: 1100px; padding: 16px; }
+  header { border-bottom: 3px solid #BC8F8F; padding-bottom: 8px; margin-bottom: 12px; }
+  h1 { font-size: 17pt; margin: 0 0 4px; }
+  .meta { color: #666; font-size: 9pt; }
+  h2 { font-size: 12pt; margin: 18px 0 6px; padding-left: 8px; border-left: 4px solid #BC8F8F; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { background: #f2eded; white-space: nowrap; }
+  tbody tr:nth-child(even) { background: #fafafa; }
+  .muted { color: #999; }
+  ul { margin: 4px 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>{{ReportTitle}}</h1>
+  <div class="meta">기간 {{Period}} · {{Company}} {{Department}} {{Author}} · 작성 {{GeneratedAt}}</div>
+</header>
+
+<h2>요약</h2>
+{{Summary}}
+
+<h2>완료한 업무 ({{DoneCount}}건)</h2>
+{{DoneList}}
+
+<h2>진행 중인 업무 ({{ActiveCount}}건)</h2>
+{{ActiveList}}
+
+<h2>기한이 지난 업무</h2>
+{{OverdueList}}
+
+<h2>다음 기간 예정 ({{NextPeriod}})</h2>
+{{PlannedList}}
+
+<h2>반복 이슈</h2>
+{{TopIssues}}
+</body>
+</html>

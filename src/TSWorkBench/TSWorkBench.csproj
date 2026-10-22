@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{413BEA83-53C6-409A-8933-553AFE010D90}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>TSWorkBench</RootNamespace>
+    <AssemblyName>TSWorkBench</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <LangVersion>7.3</LangVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="ClosedXML" Version="0.95.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Models\Enums.cs" />
+    <Compile Include="Models\Labels.cs" />
+    <Compile Include="Models\WorkItem.cs" />
+    <Compile Include="Models\MasterData.cs" />
+    <Compile Include="Models\AppSettings.cs" />
+    <Compile Include="Storage\JsonFile.cs" />
+    <Compile Include="Storage\WorkRepository.cs" />
+    <Compile Include="Storage\Workspace.cs" />
+    <Compile Include="Storage\LocationStore.cs" />
+    <Compile Include="Services\WorkflowRules.cs" />
+    <Compile Include="Services\StatsService.cs" />
+    <Compile Include="Services\WorkQuery.cs" />
+    <Compile Include="Services\TemplateEngine.cs" />
+    <Compile Include="Services\ReportGenerator.cs" />
+    <Compile Include="Services\ExcelExporter.cs" />
+    <Compile Include="Services\ImportScanner.cs" />
+    <Compile Include="Theme\DarkTheme.cs" />
+    <Compile Include="Theme\DarkForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Theme\DarkButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Theme\NavButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Theme\DarkGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Theme\DateBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Theme\StatTile.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Theme\DarkComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Theme\DarkMenuRenderer.cs" />
+    <Compile Include="Forms\ItemActions.cs" />
+    <Compile Include="Forms\UiHelpers.cs" />
+    <Compile Include="Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\WorkItemForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\WorkItemForm.Designer.cs">
+      <DependentUpon>WorkItemForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\QuickAddForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\QuickAddForm.Designer.cs">
+      <DependentUpon>QuickAddForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\PageBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Pages\WorkGrid.cs" />
+    <Compile Include="Pages\DashboardPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Pages\DashboardPage.Designer.cs">
+      <DependentUpon>DashboardPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\WorkListPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Pages\WorkListPage.Designer.cs">
+      <DependentUpon>WorkListPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\KnowledgePage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Pages\KnowledgePage.Designer.cs">
+      <DependentUpon>KnowledgePage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\ReportsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Pages\ReportsPage.Designer.cs">
+      <DependentUpon>ReportsPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\ImportPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Pages\ImportPage.Designer.cs">
+      <DependentUpon>ImportPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SettingsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Pages\SettingsPage.Designer.cs">
+      <DependentUpon>SettingsPage.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="app.manifest" />
+    <Content Include="Templates\field-report.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\item-notion.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\period-report.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\period-report.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
