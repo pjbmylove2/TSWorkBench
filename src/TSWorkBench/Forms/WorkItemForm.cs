@@ -160,6 +160,12 @@ namespace TSWorkBench.Forms
             item.TargetSystem = cboSystem.Text.Trim();
             item.ReceivedAt = dateReceived.Value ?? item.ReceivedAt;
             item.DueDate = dateDue.Value;
+            if (item.Status == WorkStatus.Done)
+            {
+                // 완료 일시는 완료 상태에서만 고칠 수 있고, 비우면 원래 값을 유지한다.
+                item.CompletedAt = dateCompleted.Value ?? item.CompletedAt;
+            }
+
             item.Requester = txtRequester.Text.Trim();
 
             item.Symptom = txtSymptom.Text;
@@ -231,7 +237,8 @@ namespace TSWorkBench.Forms
         {
             lblStatus.Text = Labels.Of(item.Status);
             lblStatus.ForeColor = DarkTheme.StatusColor(item.Status);
-            lblCompleted.Text = item.CompletedAt.HasValue ? ReportGenerator.Minute(item.CompletedAt) : "-";
+            dateCompleted.Value = item.CompletedAt;
+            dateCompleted.Enabled = item.Status == WorkStatus.Done;
             var next = WorkflowRules.NextInFlow(item.Status);
             btnAdvance.Enabled = next.HasValue;
             btnAdvance.Text = next.HasValue ? "▶ 다음 단계: " + Labels.Of(next.Value) : "▶ 다음 단계 없음";

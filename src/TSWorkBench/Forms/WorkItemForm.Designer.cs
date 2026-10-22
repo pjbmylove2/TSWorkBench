@@ -55,7 +55,7 @@ namespace TSWorkBench.Forms
             this.lblDueCap = new System.Windows.Forms.Label();
             this.dateDue = new TSWorkBench.Theme.DateBox();
             this.lblCompletedCap = new System.Windows.Forms.Label();
-            this.lblCompleted = new System.Windows.Forms.Label();
+            this.dateCompleted = new TSWorkBench.Theme.DateBox();
             this.lblRequesterCap = new System.Windows.Forms.Label();
             this.txtRequester = new System.Windows.Forms.TextBox();
             this.pnlSectionNav = new System.Windows.Forms.Panel();
@@ -223,7 +223,7 @@ namespace TSWorkBench.Forms
             this.tblSummary.Controls.Add(this.lblDueCap, 2, 3);
             this.tblSummary.Controls.Add(this.dateDue, 3, 3);
             this.tblSummary.Controls.Add(this.lblCompletedCap, 4, 3);
-            this.tblSummary.Controls.Add(this.lblCompleted, 5, 3);
+            this.tblSummary.Controls.Add(this.dateCompleted, 5, 3);
             this.tblSummary.Controls.Add(this.lblRequesterCap, 6, 3);
             this.tblSummary.Controls.Add(this.txtRequester, 7, 3);
             this.tblSummary.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -456,6 +456,7 @@ namespace TSWorkBench.Forms
             this.dateDue.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dateDue.Margin = new System.Windows.Forms.Padding(3, 7, 14, 6);
             this.dateDue.Name = "dateDue";
+            this.dateDue.ShowTime = true;
             this.dateDue.TabIndex = 9;
             //
             // lblCompletedCap
@@ -466,12 +467,13 @@ namespace TSWorkBench.Forms
             this.lblCompletedCap.Text = "완료 일시";
             this.lblCompletedCap.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
-            // lblCompleted
+            // dateCompleted
             //
-            this.lblCompleted.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblCompleted.Name = "lblCompleted";
-            this.lblCompleted.Text = "-";
-            this.lblCompleted.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.dateCompleted.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dateCompleted.Margin = new System.Windows.Forms.Padding(3, 7, 14, 6);
+            this.dateCompleted.Name = "dateCompleted";
+            this.dateCompleted.ShowTime = true;
+            this.dateCompleted.TabIndex = 10;
             //
             // lblRequesterCap
             //
@@ -489,7 +491,7 @@ namespace TSWorkBench.Forms
             this.txtRequester.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
             this.txtRequester.Margin = new System.Windows.Forms.Padding(3, 7, 3, 3);
             this.txtRequester.Name = "txtRequester";
-            this.txtRequester.TabIndex = 10;
+            this.txtRequester.TabIndex = 11;
             //
             // pnlSectionNav
             //
@@ -1548,7 +1550,7 @@ namespace TSWorkBench.Forms
         private System.Windows.Forms.Label lblDueCap;
         private TSWorkBench.Theme.DateBox dateDue;
         private System.Windows.Forms.Label lblCompletedCap;
-        private System.Windows.Forms.Label lblCompleted;
+        private TSWorkBench.Theme.DateBox dateCompleted;
         private System.Windows.Forms.Label lblRequesterCap;
         private System.Windows.Forms.TextBox txtRequester;
         private System.Windows.Forms.Panel pnlSectionNav;
