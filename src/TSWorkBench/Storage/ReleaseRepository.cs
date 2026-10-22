@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using TSWorkBench.Models;
@@ -71,6 +72,20 @@ namespace TSWorkBench.Storage
             }
         }
 
+        /// <summary>프로그램의 배포 기록 폴더를 휴지통으로 옮긴다. 완전히 지우지 않는다. 옮긴 기록 수를 돌려준다.</summary>
+        public int MoveProgramToTrash(string program, string trashDir)
+        {
+            var folder = Path.Combine(dir, SafeName(program));
+            if (Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(trashDir);
+                var target = Path.Combine(trashDir, "Releases_" + SafeName(program) + "_" + DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture));
+                Directory.Move(folder, target);
+            }
+
+            return releases.RemoveAll(r => Same(r.Program, program));
+        }
+
         /// <summary>
         /// 설비별로 프로그램마다 마지막으로 설치한(되돌리지 않은) 버전.
         /// "지금 그 설비에 무슨 버전이 깔려 있나"에 답한다.
@@ -86,7 +101,9 @@ namespace TSWorkBench.Storage
                     Program = r.Program,
                     Version = r.Version,
                     DeployedAt = d.DeployedAt,
-                    WorkItemId = d.WorkItemId
+                    WorkItemId = d.WorkItemId,
+                    Release = r,
+                    Deployment = d
                 }))
                 .GroupBy(v => (v.Customer + "|" + v.Site + "|" + v.Equipment + "|" + v.Program).ToUpperInvariant())
                 .Select(g => g.OrderByDescending(v => v.DeployedAt).First())

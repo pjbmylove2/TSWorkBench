@@ -16,6 +16,8 @@ namespace TSWorkBench.Pages
             InitializeComponent();
         }
 
+        public override string HelpTopic => "3.1";
+
         public override string PageTitle => "대시보드";
 
         public override string PageSubtitle => DateTime.Today.ToString("yyyy-MM-dd (ddd)", CultureInfo.GetCultureInfo("ko-KR")) + " · 숫자 카드를 누르면 해당 목록으로 이동합니다";

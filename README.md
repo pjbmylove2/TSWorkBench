@@ -8,6 +8,7 @@ TS(Technical Support) 업무를 **업무 카드 한 가지 형식**으로 기록
 - 화면은 OmniSight와 같은 다크 테마, 글꼴은 실행 파일에 넣은 나눔고딕 (OmniSight FontManager 방식)
 - 프로그램 · 배포: 버튼 ① 등록 ② 새 버전 배포 ③ 설치 기록. Git 명령은 도구가 대신 실행 (VS2022에서 커밋만), 사이트별 설치 버전·NAS 코드 백업
 - 매일 자동 백업, 유사 사례 찾기, 반복 업무 복제
+- 프로그램 안 **도움말**(F1 = 지금 화면 설명, 목차·검색) — `docs\`의 문서를 그대로 보여 줌
 
 ![대시보드](docs/images/01_대시보드.png)
 
@@ -16,6 +17,7 @@ TS(Technical Support) 업무를 **업무 카드 한 가지 형식**으로 기록
 | 문서 | 내용 |
 | --- | --- |
 | [docs/사용설명서.md](docs/사용설명서.md) | 설치, 화면별 사용법(프로그램 · 배포, 자동 백업 포함), 단축키, 백업·이전, 템플릿 수정 |
+| [docs/백업_이전_가이드.md](docs/백업_이전_가이드.md) | 다른 PC에서 똑같이 쓰려면 어디를 복사하는지, 평소 백업, 고장 났을 때 복구 |
 | [docs/TS업무관리_가이드.md](docs/TS업무관리_가이드.md) | TS 업무를 어떻게 관리하는지: 원칙, 상태 흐름, 기록 요령, 하루·주간 루틴, 예제 3건 |
 | [docs/배포관리_가이드.md](docs/배포관리_가이드.md) | 터미널 없이 버전 관리: 프로그램 등록, 새 버전 배포, 커밋 메시지 규칙, 과거 zip 가져오기, 3년 치 자료 정리 순서 |
 | [docs/examples/TSWorkData](docs/examples/TSWorkData) | 예제 데이터 폴더 (업무 6건, 배포본 2건 + 생성된 보고서 샘플) |
@@ -37,7 +39,9 @@ src\TSWorkBench\
   Theme\      다크 테마 색·컨트롤 (DarkButton, NavButton, DarkGrid, DarkComboBox, DateBox, StatTile), FontManager
   Forms\      메인 창, 업무 카드, 빠른 접수, 유사 사례, 프로그램 등록, 새 버전 배포, 과거 버전 가져오기,
               설치 기록, 폴더 선택(NAS 경로 입력 가능)
-  Pages\      대시보드, 업무 목록, 지식베이스, 보고서, 프로그램 · 배포, 가져오기, 설정
+  Pages\      대시보드, 업무 목록, 지식베이스, 보고서, 프로그램 · 배포, 가져오기, 설정, 도움말
+  (빌드하면 docs\*.md·docs\images가 실행 파일 옆 Help\로 복사되어 도움말 화면에 나옵니다.
+   기능을 바꾸면 docs\의 문서도 같이 고칩니다.)
   Templates\  보고서 기본 템플릿 (첫 실행 때 데이터 폴더로 복사)
   Resources\  NanumGothic.ttf (실행 파일에 포함)
 src\TSWorkBench.Checks\   화면 없이 핵심 로직을 확인하는 검증 프로그램

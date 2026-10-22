@@ -40,6 +40,8 @@ namespace TSWorkBench.Services
         public string LatestVersion { get; set; } = "";
         public DateTime DeployedAt { get; set; }
         public string WorkItemId { get; set; } = "";
+        public ReleaseRecord Release { get; set; }
+        public Deployment Deployment { get; set; }
 
         public bool IsLatest => VersionUtil.Compare(Version, LatestVersion) >= 0;
 
@@ -252,8 +254,80 @@ namespace TSWorkBench.Services
 
         // ── ② 새 버전 배포 ───────────────────────────────────
 
+        private static readonly string[] SkipBuildDirs = { "obj", ".git", ".vs", "packages", "node_modules", "Debug" };
+
+        /// <summary>
+        /// 코드 폴더 안에서 Release 빌드 결과 폴더를 찾는다: exe가 있는 폴더 중 exe가 가장 최근인 곳.
+        /// obj·Debug 등은 뺀다. 프로젝트마다 bin\Release, bin\x64\Release, 솔루션의 bin\ 등 위치가 달라서 이름으로 정하지 않는다.
+        /// </summary>
+        public static string FindBuildFolder(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code) || !Directory.Exists(code))
+            {
+                return null;
+            }
+
+            string best = null;
+            var bestTime = DateTime.MinValue;
+            var pending = new Stack<string>();
+            pending.Push(code);
+            while (pending.Count > 0)
+            {
+                var dir = pending.Pop();
+                try
+                {
+                    var exes = Directory.GetFiles(dir, "*.exe").Where(f => !f.EndsWith(".vshost.exe", StringComparison.OrdinalIgnoreCase)).ToList();
+                    if (exes.Count > 0)
+                    {
+                        var newest = exes.Max(File.GetLastWriteTime);
+                        if (newest > bestTime)
+                        {
+                            best = dir;
+                            bestTime = newest;
+                        }
+                    }
+
+                    foreach (var sub in Directory.GetDirectories(dir))
+                    {
+                        if (!SkipBuildDirs.Contains(Path.GetFileName(sub), StringComparer.OrdinalIgnoreCase))
+                        {
+                            pending.Push(sub);
+                        }
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
+                catch (IOException)
+                {
+                }
+            }
+
+            return best;
+        }
+
+        /// <summary>빌드 폴더가 비었거나 없어졌으면 다시 찾아 저장한다. 찾으면(또는 이미 있으면) true.</summary>
+        public bool EnsureBuildFolder(ProgramInfo p)
+        {
+            if (!string.IsNullOrWhiteSpace(p.BuildFolder) && Directory.Exists(p.BuildFolder))
+            {
+                return true;
+            }
+
+            var found = FindBuildFolder(p.CodeFolder);
+            if (found == null)
+            {
+                return false;
+            }
+
+            p.BuildFolder = found;
+            ws.SavePrograms();
+            return true;
+        }
+
         public PendingInfo GetPending(ProgramInfo p)
         {
+            EnsureBuildFolder(p);
             var info = new PendingInfo { LatestVersion = LatestVersion(p.Name) };
             var git = Git(p);
             info.IsRepo = Directory.Exists(p.CodeFolder) && git.HasCommits;
@@ -322,6 +396,11 @@ namespace TSWorkBench.Services
             if (string.IsNullOrWhiteSpace(ws.Settings.ReleaseStore))
             {
                 throw new InvalidOperationException("설정 › 배포본 보관소를 먼저 지정하세요.");
+            }
+
+            if (!EnsureBuildFolder(p))
+            {
+                Report(log, "⚠ 빌드 결과 폴더를 찾지 못해 소스·매뉴얼만 담습니다. (프로그램 보기 › 설정 고치기에서 지정)");
             }
 
             var head = git.Head();
@@ -583,7 +662,9 @@ namespace TSWorkBench.Services
                 Version = v.Version,
                 LatestVersion = LatestVersion(v.Program) ?? v.Version,
                 DeployedAt = v.DeployedAt,
-                WorkItemId = v.WorkItemId
+                WorkItemId = v.WorkItemId,
+                Release = v.Release,
+                Deployment = v.Deployment
             }).ToList();
         }
 
@@ -591,6 +672,20 @@ namespace TSWorkBench.Services
         public List<string> PushAll()
         {
             var failures = new List<string>();
+
+            // 새 PC에서 코드 폴더가 아직 없으면 NAS 저장소를 믿을 곳으로만 올려 둔다 → VS2022 '리포지토리 복제'가 된다.
+            foreach (var p in ws.Programs.Where(p => p.HasRemote && !Directory.Exists(Path.Combine(p.CodeFolder, ".git")) && Directory.Exists(p.GitRemote)))
+            {
+                try
+                {
+                    new GitRunner(ws.Root, ws.Settings.UserName).Trust(p.GitRemote);
+                }
+                catch (Exception ex)
+                {
+                    failures.Add(p.Name + ": " + ex.Message);
+                }
+            }
+
             foreach (var p in ws.Programs.Where(p => p.HasRemote && Directory.Exists(Path.Combine(p.CodeFolder, ".git"))))
             {
                 try

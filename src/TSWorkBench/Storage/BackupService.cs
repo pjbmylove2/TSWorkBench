@@ -9,7 +9,8 @@ namespace TSWorkBench.Storage
 {
     /// <summary>
     /// 하루 한 번 업무 기록을 zip으로 남긴다 (TSWorkData_20261022.zip).
-    /// 들어가는 것: settings.json, masters.json, 모든 item.json, Templates. 첨부(files\)는 용량 때문에 넣지 않는다.
+    /// 들어가는 것: settings.json, masters.json, programs.json, 모든 item.json, Releases(버전·설치 기록), Templates.
+    /// 첨부(files\)는 용량 때문에 넣지 않는다.
     /// </summary>
     public static class BackupService
     {
@@ -62,7 +63,7 @@ namespace TSWorkBench.Storage
 
         private static IEnumerable<string> FilesToBackup(string root)
         {
-            foreach (var name in new[] { "settings.json", "masters.json" })
+            foreach (var name in new[] { "settings.json", "masters.json", "programs.json" })
             {
                 var file = Path.Combine(root, name);
                 if (File.Exists(file))
@@ -75,6 +76,16 @@ namespace TSWorkBench.Storage
             if (Directory.Exists(items))
             {
                 foreach (var file in Directory.EnumerateFiles(items, "item.json", SearchOption.AllDirectories))
+                {
+                    yield return file;
+                }
+            }
+
+            // 버전·설치 기록 (프로그램\버전.json)
+            var releases = Path.Combine(root, "Releases");
+            if (Directory.Exists(releases))
+            {
+                foreach (var file in Directory.EnumerateFiles(releases, "*.json", SearchOption.AllDirectories))
                 {
                     yield return file;
                 }

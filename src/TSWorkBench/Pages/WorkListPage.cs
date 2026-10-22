@@ -29,6 +29,8 @@ namespace TSWorkBench.Pages
 
         public bool PlannedMode { get; set; }
 
+        public override string HelpTopic => "3.4";
+
         public override string PageTitle => PlannedMode ? "할 일 · 예정 업무" : "전체 업무 목록";
 
         public override string PageSubtitle => PlannedMode

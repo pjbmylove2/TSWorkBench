@@ -87,7 +87,7 @@ namespace TSWorkBench.Forms
 
             if (txtBuild.Text.Trim().Length == 0)
             {
-                txtBuild.Text = FindBuildFolder(code) ?? "";
+                txtBuild.Text = ProgramService.FindBuildFolder(code) ?? "";
             }
 
             if (txtManual.Text.Trim().Length == 0 && Directory.Exists(Path.Combine(code, "docs")))
@@ -108,23 +108,6 @@ namespace TSWorkBench.Forms
                 {
                     Log("Git 저장소가 아닙니다. 지금 코드를 기준 버전으로 기록합니다.");
                 }
-            }
-        }
-
-        /// <summary>bin\Release 중 exe가 있고 가장 최근에 빌드된 폴더.</summary>
-        public static string FindBuildFolder(string code)
-        {
-            try
-            {
-                return Directory.GetDirectories(code, "Release", SearchOption.AllDirectories)
-                    .Where(d => string.Equals(Path.GetFileName(Path.GetDirectoryName(d)), "bin", StringComparison.OrdinalIgnoreCase))
-                    .Where(d => Directory.GetFiles(d, "*.exe").Any())
-                    .OrderByDescending(Directory.GetLastWriteTime)
-                    .FirstOrDefault();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return null;
             }
         }
 

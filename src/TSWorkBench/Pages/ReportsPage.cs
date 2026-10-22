@@ -17,6 +17,8 @@ namespace TSWorkBench.Pages
             InitializeComponent();
         }
 
+        public override string HelpTopic => "3.6";
+
         public override string PageTitle => "보고서 · 업무대장";
 
         public override string PageSubtitle => "기간을 고르고 버튼을 누르면 데이터 폴더\\Reports에 저장됩니다. 양식은 Templates 폴더의 파일을 고치면 바뀝니다";

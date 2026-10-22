@@ -27,6 +27,8 @@ namespace TSWorkBench.Pages
             InitializeComponent();
         }
 
+        public override string HelpTopic => "3.7";
+
         public override string PageTitle => "프로그램 · 배포";
 
         public override string PageSubtitle => "버전 관리 순서: ① 프로그램 등록(처음 한 번) → VS2022에서 커밋 → ② 새 버전 배포 → ③ 다른 곳에 설치 기록";
@@ -34,20 +36,34 @@ namespace TSWorkBench.Pages
         public override void Attach(IAppHost host)
         {
             base.Attach(host);
-            var deployMenu = DarkMenuRenderer.CreateMenu();
-            deployMenu.Items.Add("되돌림 표시 / 해제", null, (s, e) => ToggleRolledBack());
-            gridDeploy.ContextMenuStrip = deployMenu;
-            SelectRowOnRightClick(gridDeploy);
+            // 설치 기록: 버전 목록의 설치 이력과 설치 현황 둘 다에서 고치기·삭제·되돌림
+            Func<Tuple<ReleaseRecord, Deployment>> fromDeploy = () => Tuple.Create(gridReleases.SelectedTag<ReleaseRecord>(), gridDeploy.SelectedTag<Deployment>());
+            Func<Tuple<ReleaseRecord, Deployment>> fromStatus = () =>
+            {
+                var row = gridStatus.SelectedTag<InstallRow>();
+                return Tuple.Create(row?.Release, row?.Deployment);
+            };
+            AttachDeploymentMenu(gridDeploy, fromDeploy);
+            AttachDeploymentMenu(gridStatus, fromStatus);
 
             var programMenu = DarkMenuRenderer.CreateMenu();
             programMenu.Items.Add("VS2022로 열기 (.sln)", null, (s, e) => OpenSolution());
             programMenu.Items.Add("코드 폴더 열기", null, (s, e) => OpenFolder(p => p.CodeFolder));
-            programMenu.Items.Add("빌드 결과 폴더 열기", null, (s, e) => OpenFolder(p => p.BuildFolder));
+            programMenu.Items.Add("빌드 결과 폴더 열기", null, (s, e) => OpenBuildFolder());
             programMenu.Items.Add("과거 버전 가져오기", null, (s, e) => btnImport_Click(s, e));
             programMenu.Items.Add(new ToolStripSeparator());
             programMenu.Items.Add("설정 고치기 (폴더·NAS 위치)", null, (s, e) => EditProgram());
+            programMenu.Items.Add("프로그램 삭제 (목록에서 빼기)", null, (s, e) => DeleteProgram());
             gridPrograms.ContextMenuStrip = programMenu;
             SelectRowOnRightClick(gridPrograms);
+            gridPrograms.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Delete)
+                {
+                    e.Handled = true;
+                    DeleteProgram();
+                }
+            };
 
             viewStatus.Checked = true;
         }
@@ -124,7 +140,7 @@ namespace TSWorkBench.Pages
             {
                 lblHelp.Text = gridStatus.Rows.Count == 0
                     ? "아직 설치 기록이 없습니다. '① 프로그램 등록'에서 지금 쓰는 곳을 넣거나, '③ 다른 곳에 설치 기록'으로 추가하세요."
-                    : "▲ 업데이트 가능 = 더 높은 버전이 있는 곳. 그 위치에 새 버전을 깔았으면 '③ 다른 곳에 설치 기록'으로 남기세요.";
+                    : "▲ 업데이트 가능 = 더 높은 버전이 있는 곳. 줄 더블클릭 = 설치 기록 고치기, 오른쪽 클릭 › 되돌림 표시 · 삭제(Delete).";
             }
         }
 
@@ -179,10 +195,82 @@ namespace TSWorkBench.Pages
             }
         }
 
-        private void ToggleRolledBack()
+        private void AttachDeploymentMenu(DarkGrid grid, Func<Tuple<ReleaseRecord, Deployment>> selected)
         {
-            var r = gridReleases.SelectedTag<ReleaseRecord>();
-            var d = gridDeploy.SelectedTag<Deployment>();
+            var menu = DarkMenuRenderer.CreateMenu();
+            menu.Items.Add("설치 기록 고치기", null, (s, e) => EditDeployment(selected()));
+            menu.Items.Add("되돌림 표시 / 해제 (이전 버전으로 되돌렸을 때)", null, (s, e) => ToggleRolledBack(selected()));
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add("설치 기록 삭제 (잘못 넣은 기록)", null, (s, e) => DeleteDeployment(selected()));
+            grid.ContextMenuStrip = menu;
+            SelectRowOnRightClick(grid);
+            grid.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex >= 0)
+                {
+                    EditDeployment(selected());
+                }
+            };
+            grid.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Delete)
+                {
+                    e.Handled = true;
+                    DeleteDeployment(selected());
+                }
+            };
+        }
+
+        private void EditDeployment(Tuple<ReleaseRecord, Deployment> sel)
+        {
+            if (sel.Item1 == null || sel.Item2 == null)
+            {
+                return;
+            }
+
+            using (var dialog = new DeployDialog(Ws, sel.Item2, sel.Item1))
+            {
+                dialog.ShowDialog(this);
+            }
+
+            RefreshData();
+        }
+
+        private void DeleteDeployment(Tuple<ReleaseRecord, Deployment> sel)
+        {
+            var r = sel.Item1;
+            var d = sel.Item2;
+            if (r == null || d == null)
+            {
+                return;
+            }
+
+            var message = r.Program + " v" + r.Version + "\n" + d.Location + "  " + ReportGenerator.Minute(d.DeployedAt)
+                          + "\n\n이 설치 기록을 지울까요?\n(이전 버전으로 되돌린 거라면 지우지 말고 '되돌림 표시'를 쓰세요.)";
+            if (MessageBox.Show(this, message, "설치 기록 삭제", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            var index = r.Deployments.IndexOf(d);
+            r.Deployments.Remove(d);
+            try
+            {
+                Ws.Releases.Save(r);
+            }
+            catch (Exception ex)
+            {
+                r.Deployments.Insert(Math.Max(0, index), d);
+                ItemActions.ShowError(this, "설치 기록 삭제", ex);
+            }
+
+            RefreshData();
+        }
+
+        private void ToggleRolledBack(Tuple<ReleaseRecord, Deployment> sel)
+        {
+            var r = sel.Item1;
+            var d = sel.Item2;
             if (r == null || d == null)
             {
                 return;
@@ -199,8 +287,7 @@ namespace TSWorkBench.Pages
                 ItemActions.ShowError(this, "저장", ex);
             }
 
-            ShowDetail();
-            FillStatus();
+            RefreshData();
         }
 
         // ── 프로그램 ─────────────────────────────────────────
@@ -221,7 +308,7 @@ namespace TSWorkBench.Pages
 
             if (viewPrograms.Checked)
             {
-                lblHelp.Text = "더블클릭 또는 오른쪽 클릭: VS2022로 열기 · 폴더 열기 · 설정 고치기. 코드 상태가 '커밋 안 한 변경'이면 VS2022에서 커밋하세요.";
+                lblHelp.Text = "더블클릭: VS2022로 열기 · 오른쪽 클릭: 폴더 열기 · 설정 고치기 · 삭제(Delete). 코드 상태가 '커밋 안 한 변경'이면 VS2022에서 커밋하세요.";
             }
         }
 
@@ -288,10 +375,87 @@ namespace TSWorkBench.Pages
         private void OpenFolder(Func<ProgramInfo, string> path)
         {
             var p = SelectedProgram();
-            if (p != null)
+            if (p == null)
             {
-                ItemActions.OpenPath(path(p));
+                return;
             }
+
+            if (string.IsNullOrWhiteSpace(path(p)))
+            {
+                AskToSetFolders(p, "코드 폴더가 지정되지 않았습니다.");
+                return;
+            }
+
+            ItemActions.OpenPath(path(p));
+        }
+
+        /// <summary>빌드 폴더가 비었거나 없어졌으면 코드 폴더에서 다시 찾아 연다.</summary>
+        private void OpenBuildFolder()
+        {
+            var p = SelectedProgram();
+            if (p == null)
+            {
+                return;
+            }
+
+            bool found;
+            try
+            {
+                found = new ProgramService(Ws).EnsureBuildFolder(p);
+            }
+            catch (Exception ex)
+            {
+                ItemActions.ShowError(this, "빌드 결과 폴더", ex);
+                return;
+            }
+
+            if (!found)
+            {
+                AskToSetFolders(p, "빌드 결과 폴더(실행 파일이 만들어지는 곳)를 찾지 못했습니다.\nVS2022에서 Release로 빌드했는지 확인하세요.");
+                return;
+            }
+
+            ItemActions.OpenPath(p.BuildFolder);
+        }
+
+        private void AskToSetFolders(ProgramInfo p, string reason)
+        {
+            if (MessageBox.Show(this, reason + "\n\n'설정 고치기'에서 직접 지정할까요?", p.Name,
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+            {
+                EditProgram();
+            }
+        }
+
+        private void DeleteProgram()
+        {
+            var p = SelectedProgram();
+            if (p == null)
+            {
+                return;
+            }
+
+            var versions = Ws.Releases.All.Count(r => string.Equals(r.Program, p.Name, StringComparison.OrdinalIgnoreCase));
+            var message = "'" + p.Name + "'을(를) 프로그램 목록에서 뺄까요?\n\n"
+                          + (versions > 0 ? "· 버전·설치 기록 " + versions + "개는 데이터 폴더\\Trash로 옮깁니다 (지워지지 않음).\n" : "")
+                          + "· 코드 폴더, NAS 코드 백업, 배포본 보관소의 파일은 그대로 둡니다.\n"
+                          + "· 업무 카드에 적힌 배포 내역도 그대로 남습니다.";
+            if (MessageBox.Show(this, message, "프로그램 삭제", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                Ws.RemoveProgram(p);
+            }
+            catch (Exception ex)
+            {
+                ItemActions.ShowError(this, "프로그램 삭제", ex);
+                return;
+            }
+
+            RefreshData();
         }
 
         private void EditProgram()
@@ -328,7 +492,7 @@ namespace TSWorkBench.Pages
             gridPrograms.Visible = viewPrograms.Checked;
             if (viewVersions.Checked)
             {
-                lblHelp.Text = "버전을 고르면 변경 내역과 설치한 곳이 보입니다. 설치 이력에서 오른쪽 클릭 › 되돌림 표시 (이전 버전으로 되돌렸을 때).";
+                lblHelp.Text = "버전을 고르면 변경 내역과 설치한 곳이 보입니다. 설치 이력 더블클릭 = 고치기, 오른쪽 클릭 › 되돌림 표시(롤백) · 삭제(Delete).";
             }
 
             if (Host != null)

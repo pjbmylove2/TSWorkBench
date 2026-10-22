@@ -138,7 +138,7 @@ namespace TSWorkBench.Forms
             this.lblEquipment.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblEquipment.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             this.lblEquipment.Name = "lblEquipment";
-            this.lblEquipment.Text = "설비 *";
+            this.lblEquipment.Text = "설비";
             this.lblEquipment.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // cboEquipment

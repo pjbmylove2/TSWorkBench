@@ -15,6 +15,8 @@ namespace TSWorkBench.Pages
             InitializeComponent();
         }
 
+        public override string HelpTopic => "3.5";
+
         public override string PageTitle => "지식베이스 (해결 사례)";
 
         public override string PageSubtitle => "완료된 업무의 현상 · 원인 · 조치 · 재발방지를 검색합니다. 예) \"카메라 끊김\", \"2라인 오판정\"";

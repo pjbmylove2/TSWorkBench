@@ -23,6 +23,8 @@ namespace TSWorkBench.Pages
             colType.DefaultCellStyle.BackColor = Theme.DarkTheme.GridRow;
         }
 
+        public override string HelpTopic => "3.8";
+
         public override string PageTitle => "과거 자료 가져오기";
 
         public override string PageSubtitle => "흩어진 보고서·메일·폴더를 업무 카드로 만듭니다. 원본은 옮기거나 지우지 않습니다 (같은 경로는 다시 등록되지 않음)";

@@ -71,6 +71,18 @@ namespace TSWorkBench.Storage
             JsonFile.WriteAtomic(ProgramsPath, Programs);
         }
 
+        /// <summary>
+        /// 프로그램을 목록에서 뺀다. 배포 기록은 Trash로 옮기고, 코드 폴더·NAS 코드 백업·배포본 보관소는 건드리지 않는다.
+        /// 옮긴 배포 기록 수를 돌려준다.
+        /// </summary>
+        public int RemoveProgram(ProgramInfo program)
+        {
+            var moved = Releases.MoveProgramToTrash(program.Name, Path.Combine(Root, "Trash"));
+            Programs.Remove(program);
+            SavePrograms();
+            return moved;
+        }
+
         /// <summary>폴더가 없으면 만들고, 빠진 기본 파일·템플릿을 채운 뒤 업무를 모두 읽는다.</summary>
         public static Workspace Open(string root, string defaultTemplatesDir)
         {

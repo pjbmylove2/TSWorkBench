@@ -20,6 +20,8 @@ namespace TSWorkBench.Pages
             InitializeComponent();
         }
 
+        public override string HelpTopic => "3.9";
+
         public override string PageTitle => "설정 · 기준 정보";
 
         public override string PageSubtitle => "다른 회사로 옮길 때는 데이터 폴더를 새로 만들고 여기서 회사·기준 정보만 바꾸면 됩니다";

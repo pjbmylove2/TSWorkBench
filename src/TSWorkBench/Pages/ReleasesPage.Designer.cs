@@ -411,7 +411,7 @@ namespace TSWorkBench.Pages
             this.lblDeployTitle.Name = "lblDeployTitle";
             this.lblDeployTitle.Size = new System.Drawing.Size(673, 36);
             this.lblDeployTitle.TabIndex = 1;
-            this.lblDeployTitle.Text = "설치 이력  (오른쪽 클릭: 되돌림 표시)";
+            this.lblDeployTitle.Text = "설치 이력  (더블클릭: 고치기 · 오른쪽 클릭: 되돌림·삭제)";
             this.lblDeployTitle.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             //
             // txtDetail

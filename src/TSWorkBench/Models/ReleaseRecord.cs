@@ -66,5 +66,12 @@ namespace TSWorkBench.Models
         public string Version { get; set; } = "";
         public DateTime DeployedAt { get; set; }
         public string WorkItemId { get; set; } = "";
+
+        /// <summary>이 줄의 원본 (고치기·삭제용).</summary>
+        [JsonIgnore]
+        public ReleaseRecord Release { get; set; }
+
+        [JsonIgnore]
+        public Deployment Deployment { get; set; }
     }
 }

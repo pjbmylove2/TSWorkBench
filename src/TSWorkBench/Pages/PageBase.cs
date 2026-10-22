@@ -46,6 +46,9 @@ namespace TSWorkBench.Pages
 
         public virtual string PageSubtitle => "";
 
+        /// <summary>F1을 누르면 열 사용설명서 제목의 앞부분 (예: "3.7"). 없으면 사용설명서 처음.</summary>
+        public virtual string HelpTopic => null;
+
         public virtual void Attach(IAppHost host)
         {
             Host = host;

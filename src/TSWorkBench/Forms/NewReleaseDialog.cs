@@ -128,6 +128,10 @@ namespace TSWorkBench.Forms
                 {
                     lines.Add("⚠ 마지막 버전 뒤에 새 커밋이 없습니다. 고친 코드를 먼저 커밋하세요.");
                 }
+                else if (!pending.BuildTime.HasValue)
+                {
+                    lines.Add("⚠ 빌드 결과 폴더를 못 찾았습니다 → Release로 빌드하거나 프로그램 보기 › 설정 고치기에서 지정 (그대로면 실행 파일 없이 배포)");
+                }
                 else if (pending.BuildIsOld)
                 {
                     lines.Add("⚠ 빌드가 마지막 커밋보다 오래됐습니다 → VS2022에서 Release로 다시 빌드");

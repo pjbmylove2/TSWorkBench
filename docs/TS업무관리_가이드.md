@@ -249,7 +249,7 @@
 
 ## 12. 예제 — 처음부터 끝까지
 
-예제 데이터 폴더 [examples/TSWorkData](examples/TSWorkData)에 아래 업무가 실제로 들어 있다. `TSWorkBench.exe --data "…\docs\examples\TSWorkData"`로 열어 보면서 읽으면 된다.
+예제 데이터 폴더(저장소의 `docs\examples\TSWorkData`)에 아래 업무가 실제로 들어 있다. `TSWorkBench.exe --data "…\docs\examples\TSWorkData"`로 열어 보면서 읽으면 된다.
 
 ### 예제 1. 현장 출동 + HW 조치 — `TS-2026-10-0001` 2라인 OCR 오판정 증가 (조명 열화)
 

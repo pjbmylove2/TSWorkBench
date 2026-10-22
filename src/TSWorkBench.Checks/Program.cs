@@ -35,6 +35,7 @@ namespace TSWorkBench.Checks
                 ReportChecks(root);
                 FeatureChecks(root + "_features");
                 ProgramChecks(root + "_programs");
+                HelpChecks();
             }
             catch (Exception ex)
             {
@@ -227,13 +228,18 @@ namespace TSWorkBench.Checks
                 other.Equipment = "롤프레스 1호기";
                 ws.Save(other);
 
-                // 자동 백업
+                // 자동 백업 (프로그램 목록·버전 기록도 들어가야 다른 PC에서 그대로 쓸 수 있다)
+                ws.Programs.Add(new ProgramInfo { Name = "BackupDemo" });
+                ws.SavePrograms();
+                ws.Releases.Save(new ReleaseRecord { Program = "BackupDemo", Version = "1.0.0" });
                 var first = BackupService.RunDaily(ws, now);
                 Check("백업 zip 생성", first != null && File.Exists(first));
                 Check("같은 날 두 번째는 건너뜀", BackupService.RunDaily(ws, now.AddHours(3)) == null);
                 using (var zip = System.IO.Compression.ZipFile.OpenRead(first))
                 {
                     Check("백업에 item.json 포함", zip.Entries.Count(e => e.Name == "item.json") == 2 && zip.Entries.Any(e => e.FullName == "settings.json"));
+                    Check("백업에 programs.json·버전 기록 포함", zip.Entries.Any(e => e.FullName == "programs.json")
+                                                          && zip.Entries.Any(e => e.FullName.Replace('/', '\\') == @"Releases\BackupDemo\1.0.0.json"));
                 }
 
                 BackupService.RunDaily(ws, now.AddDays(1));
@@ -497,6 +503,33 @@ namespace TSWorkBench.Checks
                 var ocrRemote = Path.Combine(root, "NAS", "TSWork", "Git", "OCR.git").Replace('\\', '/');
                 var trusted = File.ReadAllText(globalConfig);
                 Check("NAS 저장소를 safe.directory에 한 번만 등록", trusted.Split('\n').Count(l => l.Trim().EndsWith(ocrRemote, StringComparison.OrdinalIgnoreCase)) == 1, trusted);
+
+                // 빌드 결과가 솔루션 bin\에 모이는 프로젝트 (LineScan 방식). obj·Debug의 exe는 무시
+                var sol = Path.Combine(root, "Source", "Sol");
+                foreach (var d in new[] { @"bin", @"App\obj\x64\Release", @"App\bin\Debug" })
+                {
+                    Directory.CreateDirectory(Path.Combine(sol, d));
+                    File.WriteAllText(Path.Combine(sol, d, "App.exe"), d);
+                }
+
+                File.SetLastWriteTime(Path.Combine(sol, "bin", "App.exe"), DateTime.Now.AddHours(-1));
+                Check("빌드 폴더 찾기: 솔루션 bin\\ (obj·Debug 제외)", ProgramService.FindBuildFolder(sol) == Path.Combine(sol, "bin"), ProgramService.FindBuildFolder(sol));
+
+                // 프로그램 삭제: 목록에서 빼고 배포 기록은 Trash로
+                var existingVersions = reopened.Releases.All.Count(r => r.Program == "Existing");
+                var moved = reopened.RemoveProgram(reopened.FindProgram("Existing"));
+                var afterRemove = Workspace.Open(Path.Combine(root, "data"), Templates);
+                Check("프로그램 삭제: 목록에서 빼고 배포 기록은 Trash로", existingVersions == 2 && moved == 2 && afterRemove.FindProgram("Existing") == null
+                                                                && afterRemove.Releases.All.All(r => r.Program != "Existing")
+                                                                && Directory.GetDirectories(Path.Combine(root, "data", "Trash"), "Releases_Existing_*").Length == 1
+                                                                && Directory.Exists(existing));
+
+                // 새 PC: 코드 폴더가 아직 없으면 NAS 저장소만 믿을 곳으로 (VS2022에서 복제할 수 있게)
+                var cloneRemote = Path.Combine(root, "NAS", "TSWork", "Git", "CloneMe.git");
+                Directory.CreateDirectory(cloneRemote);
+                afterRemove.Programs.Add(new ProgramInfo { Name = "CloneMe", CodeFolder = Path.Combine(root, "Source", "아직없음"), GitRemote = cloneRemote });
+                new ProgramService(afterRemove).PushAll();
+                Check("새 PC: 코드 폴더가 없어도 NAS 저장소를 믿을 곳으로 등록", File.ReadAllText(globalConfig).Contains(cloneRemote.Replace('\\', '/')));
             }
             finally
             {
@@ -551,6 +584,40 @@ namespace TSWorkBench.Checks
             ExcelExporter.Export(xlsx, all, StatsService.Compute(all, new DateTime(2026, 10, 1), new DateTime(2026, 11, 1), today), "2026년 10월 통계");
             Console.WriteLine("  → " + xlsx);
             File.WriteAllText(Path.Combine(ws.ReportsDir, "TS-2026-10-0001_notion.md"), generator.ItemMarkdown(ws.Items.Find("TS-2026-10-0001")));
+        }
+
+        /// <summary>도움말: Markdown 변환, 실행 파일 옆 Help\ 문서의 그림·링크, 화면별 F1 목적지.</summary>
+        private static void HelpChecks()
+        {
+            var sample = HelpDocument.Parse("# 제목\n\n## 1. 첫째\n문단 **굵게** `a|b`\n\n- 하나\n  - 둘\n- [ ] 셋\n\n| 가 | 나 |\n| --- | --- |\n| `x|y` | 2 |\n\n> 인용\n\n```\n<코드>\n```\n![그림](images/그림 1.png) [안내](배포관리_가이드.md)\n");
+            var html = sample.BodyHtml;
+            Check("도움말 변환: 제목·목차", sample.Title == "제목" && sample.Sections.Count == 2 && sample.Sections[1].Title == "1. 첫째" && html.Contains("<h2 id=\"s2\">"));
+            Check("도움말 변환: 목록 중첩·체크박스", html.Contains("<ul><li>하나<ul><li>둘</li></ul></li><li>☐ 셋</li></ul>"), html);
+            Check("도움말 변환: 표·코드·인용", html.Contains("<td><code>x|y</code></td>") && html.Contains("&lt;코드&gt;") && html.Contains("<blockquote><p>인용</p>"), html);
+            Check("도움말 변환: 그림·링크 주소", html.Contains("src=\"images/%EA%B7%B8%EB%A6%BC%201.png\"") && html.Contains("href=\"%EB%B0%B0"), html);
+            Check("도움말 변환: 검색용 본문", sample.Sections[1].Text.Contains("굵게") && sample.Sections[1].Text.Contains("셋"));
+
+            var folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Help");
+            var docs = HelpDocument.LoadFolder(folder);
+            Check("도움말 문서 4개 이상, 사용설명서가 처음", docs.Count >= 4 && docs[0].FileName == "사용설명서.md", string.Join(", ", docs.Select(d => d.FileName)));
+            var missing = new List<string>();
+            foreach (var doc in docs)
+            {
+                foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(doc.BodyHtml, "(?:src|href)=\"([^\"#:]+)\""))
+                {
+                    var target = Path.Combine(folder, Uri.UnescapeDataString(m.Groups[1].Value).Replace('/', '\\'));
+                    if (!File.Exists(target))
+                    {
+                        missing.Add(doc.FileName + " → " + Uri.UnescapeDataString(m.Groups[1].Value));
+                    }
+                }
+            }
+
+            Check("도움말의 그림·문서 링크가 모두 있음", missing.Count == 0, string.Join("; ", missing));
+            var manual = docs.FirstOrDefault(d => d.FileName == "사용설명서.md");
+            var topics = new[] { "3.1", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10" };
+            Check("F1 목적지가 사용설명서에 모두 있음", manual != null && topics.All(t => manual.Find(t) != null),
+                manual == null ? "" : string.Join(", ", topics.Where(t => manual.Find(t) == null)));
         }
 
         private static void Check(string name, bool ok, string detail = "")

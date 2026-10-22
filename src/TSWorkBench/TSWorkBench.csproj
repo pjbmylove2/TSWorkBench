@@ -70,6 +70,7 @@
     <Compile Include="Services\VersionUtil.cs" />
     <Compile Include="Services\GitRunner.cs" />
     <Compile Include="Services\ProgramService.cs" />
+    <Compile Include="Services\HelpDocument.cs" />
     <Compile Include="Models\ProgramInfo.cs" />
     <Compile Include="Models\ReleaseRecord.cs" />
     <Compile Include="Storage\ReleaseRepository.cs" />
@@ -102,6 +103,12 @@
     </Compile>
     <Compile Include="Forms\DeployDialog.Designer.cs">
       <DependentUpon>DeployDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\HelpPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Pages\HelpPage.Designer.cs">
+      <DependentUpon>HelpPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Pages\ReleasesPage.cs">
       <SubType>UserControl</SubType>
@@ -216,6 +223,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Templates\period-report.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <!-- 도움말: 저장소 docs\의 문서를 실행 파일 옆 Help\로 복사 (도움말 화면이 읽는다) -->
+    <Content Include="..\..\docs\*.md">
+      <Link>Help\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\docs\images\*.png">
+      <Link>Help\images\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

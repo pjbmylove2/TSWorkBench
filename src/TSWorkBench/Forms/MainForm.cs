@@ -14,6 +14,7 @@ namespace TSWorkBench.Forms
     public partial class MainForm : DarkForm, IAppHost
     {
         private readonly Dictionary<NavButton, PageBase> pages = new Dictionary<NavButton, PageBase>();
+        private readonly HelpPage helpPage = new HelpPage();
         private PageBase current;
         private Workspace workspace;
 
@@ -33,6 +34,7 @@ namespace TSWorkBench.Forms
             AddPage(navReleases, new ReleasesPage());
             AddPage(navImport, new ImportPage());
             AddPage(navSettings, new SettingsPage());
+            AddPage(navHelp, helpPage);
         }
 
         public Workspace Workspace => workspace;
@@ -88,6 +90,9 @@ namespace TSWorkBench.Forms
                     return true;
                 case Keys.F5:
                     RefreshCurrentPage();
+                    return true;
+                case Keys.F1:
+                    ShowHelp();
                     return true;
                 default:
                     return base.ProcessCmdKey(ref msg, keyData);
@@ -191,6 +196,14 @@ namespace TSWorkBench.Forms
                     ShowPage(page);
                 }
             };
+        }
+
+        /// <summary>F1: 지금 화면의 설명이 있는 곳으로 도움말을 연다.</summary>
+        private void ShowHelp()
+        {
+            var topic = current == helpPage ? null : current?.HelpTopic;
+            navHelp.Checked = true;
+            helpPage.ShowTopic(topic);
         }
 
         private void ShowPage(PageBase page)

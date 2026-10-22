@@ -29,6 +29,7 @@ namespace TSWorkBench.Forms
         private void InitializeComponent()
         {
             this.pnlNav = new System.Windows.Forms.Panel();
+            this.navHelp = new TSWorkBench.Theme.NavButton();
             this.navSettings = new TSWorkBench.Theme.NavButton();
             this.navImport = new TSWorkBench.Theme.NavButton();
             this.navReleases = new TSWorkBench.Theme.NavButton();
@@ -55,6 +56,7 @@ namespace TSWorkBench.Forms
             // pnlNav
             //
             this.pnlNav.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(47)))), ((int)(((byte)(47)))), ((int)(((byte)(47)))));
+            this.pnlNav.Controls.Add(this.navHelp);
             this.pnlNav.Controls.Add(this.navSettings);
             this.pnlNav.Controls.Add(this.navImport);
             this.pnlNav.Controls.Add(this.navReleases);
@@ -71,6 +73,15 @@ namespace TSWorkBench.Forms
             this.pnlNav.Name = "pnlNav";
             this.pnlNav.Size = new System.Drawing.Size(210, 861);
             this.pnlNav.TabIndex = 0;
+            //
+            // navHelp
+            //
+            this.navHelp.Dock = System.Windows.Forms.DockStyle.Top;
+            this.navHelp.Location = new System.Drawing.Point(0, 426);
+            this.navHelp.Name = "navHelp";
+            this.navHelp.Size = new System.Drawing.Size(210, 46);
+            this.navHelp.TabIndex = 9;
+            this.navHelp.Text = "도움말 (F1)";
             //
             // navSettings
             //
@@ -286,6 +297,7 @@ namespace TSWorkBench.Forms
         private TSWorkBench.Theme.NavButton navImport;
         private TSWorkBench.Theme.NavButton navReleases;
         private TSWorkBench.Theme.NavButton navSettings;
+        private TSWorkBench.Theme.NavButton navHelp;
         private System.Windows.Forms.Panel pnlNavBottom;
         private TSWorkBench.Theme.DarkButton btnQuickAdd;
         private System.Windows.Forms.Label lblWorkspace;
