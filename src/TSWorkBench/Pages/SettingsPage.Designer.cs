@@ -205,7 +205,7 @@ namespace TSWorkBench.Pages
             this.lblPrefix.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             this.lblPrefix.Location = new System.Drawing.Point(18, 334);
             this.lblPrefix.Name = "lblPrefix";
-            this.lblPrefix.Text = "업무 ID 앞머리 (예: TS → TS-2026-0001)";
+            this.lblPrefix.Text = "업무 ID 앞머리 (예: TS → TS-2026-10-0001)";
             //
             // txtPrefix
             //

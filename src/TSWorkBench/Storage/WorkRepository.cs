@@ -65,11 +65,12 @@ namespace TSWorkBench.Storage
             return Path.Combine(itemsDir, YearOf(item.Id), item.Id);
         }
 
-        public string NewId(string prefix, int year)
+        /// <summary>앞머리-연도-월-번호 (TS-2026-12-0001). 번호는 달마다 0001부터 다시 센다.</summary>
+        public string NewId(string prefix, DateTime received)
         {
-            var head = prefix + "-" + year.ToString(CultureInfo.InvariantCulture) + "-";
+            var head = prefix + "-" + received.ToString("yyyy-MM", CultureInfo.InvariantCulture) + "-";
             var max = 0;
-            foreach (var id in items.Select(i => i.Id).Concat(ExistingFolderNames(year)))
+            foreach (var id in items.Select(i => i.Id).Concat(ExistingFolderNames(received.Year)))
             {
                 int n;
                 if (id.StartsWith(head, StringComparison.OrdinalIgnoreCase)
@@ -89,7 +90,7 @@ namespace TSWorkBench.Storage
             var now = DateTime.Now;
             if (string.IsNullOrEmpty(item.Id))
             {
-                item.Id = NewId(idPrefix, item.ReceivedAt.Year);
+                item.Id = NewId(idPrefix, item.ReceivedAt);
                 item.CreatedAt = now;
             }
 
@@ -149,10 +150,11 @@ namespace TSWorkBench.Storage
             return path;
         }
 
+        /// <summary>ID의 연도 부분. 앞머리에는 '-'를 못 쓰므로 항상 두 번째 조각이다 (예전 형식 TS-2026-0001도 같음).</summary>
         private static string YearOf(string id)
         {
             var parts = id.Split('-');
-            return parts.Length >= 3 ? parts[parts.Length - 2] : "etc";
+            return parts.Length >= 3 ? parts[1] : "etc";
         }
 
         /// <summary>폴더 이름으로 남은 ID. 휴지통의 "ID_시각" 폴더도 넣어서 지운 업무의 번호를 다시 쓰지 않는다.</summary>

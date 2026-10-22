@@ -7,7 +7,7 @@ namespace TSWorkBench.Models
         public string Department { get; set; } = "TS팀";
         public string Company { get; set; } = "";
 
-        /// <summary>업무 ID 앞머리. TS-2026-0001</summary>
+        /// <summary>업무 ID 앞머리. TS-2026-10-0001</summary>
         public string IdPrefix { get; set; } = "TS";
 
         /// <summary>현장·HW·프로그램 수정 업무를 완료하면 이 일수 뒤에 모니터링 후속 업무를 만든다. 0이면 만들지 않는다.</summary>

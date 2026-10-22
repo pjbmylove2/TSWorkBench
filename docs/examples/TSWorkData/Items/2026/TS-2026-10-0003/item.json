@@ -1,5 +1,5 @@
 {
-  "Id": "TS-2026-0003",
+  "Id": "TS-2026-10-0003",
   "Title": "[모니터링] 2라인 OCR 오판정 증가 (조명 열화)",
   "Type": "FollowUp",
   "Status": "Received",
@@ -13,7 +13,7 @@
   "ReceivedAt": "2026-10-14T16:20:00",
   "DueDate": "2026-10-21T00:00:00",
   "CompletedAt": null,
-  "Symptom": "TS-2026-0001 조치 후 7일간 재발 여부 확인",
+  "Symptom": "TS-2026-10-0001 조치 후 7일간 재발 여부 확인",
   "SymptomWhen": "",
   "Reproduction": "",
   "Impact": "",
@@ -27,10 +27,10 @@
   "CustomerNote": "",
   "NeedsRevisit": false,
   "RevisitDate": null,
-  "ParentId": "TS-2026-0001",
+  "ParentId": "TS-2026-10-0001",
   "ImportedFrom": "",
   "Timeline": [
-    { "Start": "2026-10-14T16:20:00", "End": null, "Kind": "Note", "Text": "TS-2026-0001 완료 시 자동 생성" }
+    { "Start": "2026-10-14T16:20:00", "End": null, "Kind": "Note", "Text": "TS-2026-10-0001 완료 시 자동 생성" }
   ],
   "Checklist": [
     { "Text": "재발 여부 확인 (고객 문의·로그)", "Done": false },

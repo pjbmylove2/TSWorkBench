@@ -64,7 +64,7 @@ namespace TSWorkBench.Checks
             a.Symptom = "야간조부터 오판정\n시간당 5회";
             a.Timeline.Add(new TimelineEntry { Start = received.AddHours(1), End = received.AddHours(3.5), Kind = TimelineKind.OnSite, Text = "현장 확인" });
             ws.Save(a);
-            Check("ID 부여", a.Id == "TS-2026-0001", a.Id);
+            Check("ID 부여", a.Id == "TS-2026-10-0001", a.Id);
             Check("체크리스트 템플릿", a.Checklist.Count > 0);
 
             ws.Save(a);
@@ -78,13 +78,18 @@ namespace TSWorkBench.Checks
             var c = ws.NewItem(WorkType.Inquiry, received);
             c.Title = "문의2";
             ws.Save(c);
-            Check("ID 연속", b.Id == "TS-2026-0002" && c.Id == "TS-2026-0003", b.Id + ", " + c.Id);
+            Check("ID 연속", b.Id == "TS-2026-10-0002" && c.Id == "TS-2026-10-0003", b.Id + ", " + c.Id);
 
             ws.Items.MoveToTrash(c);
             var d = ws.NewItem(WorkType.Inquiry, received);
             d.Title = "문의3";
             ws.Save(d);
-            Check("휴지통 ID 재사용 안 함", d.Id == "TS-2026-0004", d.Id);
+            Check("휴지통 ID 재사용 안 함", d.Id == "TS-2026-10-0004", d.Id);
+
+            var nextMonth = ws.Items.NewId("TS", new DateTime(2026, 11, 2));
+            Check("달이 바뀌면 0001부터", nextMonth == "TS-2026-11-0001", nextMonth);
+            var oldFolder = ws.Items.FolderOf(new WorkItem { Id = "TS-2026-0099" });
+            Check("예전 형식 ID도 연도 폴더", oldFolder.EndsWith(Path.Combine("2026", "TS-2026-0099")), oldFolder);
 
             var reopened = Workspace.Open(root, Templates);
             var loaded = reopened.Items.Find(a.Id);
@@ -99,7 +104,7 @@ namespace TSWorkBench.Checks
         private static void WorkflowChecks()
         {
             var now = new DateTime(2026, 10, 22, 15, 0, 0);
-            var item = new WorkItem { Id = "TS-2026-0010", Title = "카메라 교체", Type = WorkType.HardwareFix, ReceivedAt = now.AddDays(-2) };
+            var item = new WorkItem { Id = "TS-2026-10-0010", Title = "카메라 교체", Type = WorkType.HardwareFix, ReceivedAt = now.AddDays(-2) };
 
             var refused = false;
             try
@@ -204,7 +209,7 @@ namespace TSWorkBench.Checks
             Check("예제 6건", ws.Items.All.Count == 6, ws.Items.All.Count.ToString());
 
             var generator = new ReportGenerator(ws);
-            foreach (var id in new[] { "TS-2026-0001", "TS-2026-0002" })
+            foreach (var id in new[] { "TS-2026-10-0001", "TS-2026-10-0002" })
             {
                 Console.WriteLine("  → " + generator.SaveFieldReport(ws.Items.Find(id)));
             }
@@ -220,7 +225,7 @@ namespace TSWorkBench.Checks
             var xlsx = Path.Combine(ws.ReportsDir, "업무대장_전체_예제.xlsx");
             ExcelExporter.Export(xlsx, all, StatsService.Compute(all, new DateTime(2026, 10, 1), new DateTime(2026, 11, 1), today), "2026년 10월 통계");
             Console.WriteLine("  → " + xlsx);
-            File.WriteAllText(Path.Combine(ws.ReportsDir, "TS-2026-0001_notion.md"), generator.ItemMarkdown(ws.Items.Find("TS-2026-0001")));
+            File.WriteAllText(Path.Combine(ws.ReportsDir, "TS-2026-10-0001_notion.md"), generator.ItemMarkdown(ws.Items.Find("TS-2026-10-0001")));
         }
 
         private static void Check(string name, bool ok, string detail = "")

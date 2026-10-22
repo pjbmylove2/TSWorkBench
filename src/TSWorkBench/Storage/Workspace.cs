@@ -10,7 +10,7 @@ namespace TSWorkBench.Storage
     /// 데이터 폴더\
     ///   settings.json   사용자·부서·ID 앞머리
     ///   masters.json    고객사·설비·시스템 목록, 체크리스트 템플릿
-    ///   Items\2026\TS-2026-0001\item.json, files\
+    ///   Items\2026\TS-2026-10-0001\item.json, files\
     ///   Templates\      보고서 템플릿 (수정 가능)
     ///   Reports\        생성된 보고서
     ///   Trash\          삭제한 업무

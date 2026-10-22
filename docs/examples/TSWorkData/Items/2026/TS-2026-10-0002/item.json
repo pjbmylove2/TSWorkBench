@@ -1,5 +1,5 @@
 {
-  "Id": "TS-2026-0002",
+  "Id": "TS-2026-10-0002",
   "Title": "카메라 연결 끊김 후 자동 재연결 안 됨",
   "Type": "ProgramChange",
   "Status": "Done",
