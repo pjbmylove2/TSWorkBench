@@ -23,6 +23,9 @@ namespace TSWorkBench.Services
         public string ManualFolder { get; set; } = "";
 
         public string Notes { get; set; } = "";
+
+        /// <summary>소스 코드 zip을 주어진 경로에 쓰는 동작 (git archive). 없으면 소스 zip을 만들지 않는다.</summary>
+        public Action<string> WriteSourceZip { get; set; }
     }
 
     /// <summary>
@@ -30,6 +33,7 @@ namespace TSWorkBench.Services
     /// <code>
     /// 보관소\{Program}\v{Version}\
     ///   {Program}_v{Version}.zip   빌드 결과 (pdb·vshost 제외)
+    ///   {Program}_v{Version}_source.zip  그 버전의 소스 코드 (Git 태그 기준)
     ///   manual\                    매뉴얼·이미지
     ///   RELEASE_NOTES.md           변경 내역
     ///   SHA256SUMS.txt             파일 무결성 확인용
@@ -57,9 +61,15 @@ namespace TSWorkBench.Services
                 throw new InvalidOperationException("프로그램 이름과 버전을 입력하세요.");
             }
 
-            if (!Directory.Exists(request.BuildFolder))
+            var hasBuild = !string.IsNullOrWhiteSpace(request.BuildFolder);
+            if (hasBuild && !Directory.Exists(request.BuildFolder))
             {
                 throw new DirectoryNotFoundException("빌드 폴더가 없습니다: " + request.BuildFolder);
+            }
+
+            if (!hasBuild && request.WriteSourceZip == null)
+            {
+                throw new InvalidOperationException("빌드 폴더를 지정하세요.");
             }
 
             var target = PackageFolder(store, request.Program, request.Version);
@@ -74,8 +84,13 @@ namespace TSWorkBench.Services
             Directory.CreateDirectory(work);
             try
             {
-                var zipName = ReleaseRepository.SafeName(request.Program) + "_v" + ReleaseRepository.SafeName(request.Version) + ".zip";
-                ZipFolder(request.BuildFolder, Path.Combine(work, zipName));
+                var stem = ReleaseRepository.SafeName(request.Program) + "_v" + ReleaseRepository.SafeName(request.Version);
+                if (hasBuild)
+                {
+                    ZipFolder(request.BuildFolder, Path.Combine(work, stem + ".zip"));
+                }
+
+                request.WriteSourceZip?.Invoke(Path.Combine(work, stem + "_source.zip"));
 
                 if (!string.IsNullOrWhiteSpace(request.ManualFolder) && Directory.Exists(request.ManualFolder))
                 {

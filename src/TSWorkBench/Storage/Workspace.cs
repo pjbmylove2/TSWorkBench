@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TSWorkBench.Models;
@@ -11,6 +12,7 @@ namespace TSWorkBench.Storage
     /// 데이터 폴더\
     ///   settings.json   사용자·부서·ID 앞머리
     ///   masters.json    고객사·설비·시스템 목록, 체크리스트 템플릿
+    ///   programs.json   버전 관리하는 프로그램 (코드 폴더·빌드 폴더·NAS 코드 백업 위치)
     ///   Items\2026\TS-2026-10-0001\item.json, files\
     ///   Templates\      보고서 템플릿 (수정 가능)
     ///   Reports\        생성된 보고서
@@ -36,8 +38,38 @@ namespace TSWorkBench.Storage
         public WorkRepository Items { get; }
         public ReleaseRepository Releases { get; }
 
+        /// <summary>버전을 관리하는 프로그램 목록 (programs.json).</summary>
+        public List<ProgramInfo> Programs { get; private set; } = new List<ProgramInfo>();
+
         private string SettingsPath => Path.Combine(Root, "settings.json");
         private string MastersPath => Path.Combine(Root, "masters.json");
+        private string ProgramsPath => Path.Combine(Root, "programs.json");
+
+        /// <summary>NAS 코드 백업 폴더. 설정이 비어 있으면 배포본 보관소 옆 Git 폴더 (…\TSWork\Releases → …\TSWork\Git).</summary>
+        public string GitStore
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(Settings.GitStore))
+                {
+                    return Settings.GitStore.Trim();
+                }
+
+                var store = (Settings.ReleaseStore ?? "").Trim().TrimEnd('\\', '/');
+                var parent = store.Length == 0 ? null : Path.GetDirectoryName(store);
+                return string.IsNullOrEmpty(parent) ? "" : Path.Combine(parent, "Git");
+            }
+        }
+
+        public ProgramInfo FindProgram(string name)
+        {
+            return Programs.FirstOrDefault(p => string.Equals(p.Name, name?.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        public void SavePrograms()
+        {
+            JsonFile.WriteAtomic(ProgramsPath, Programs);
+        }
 
         /// <summary>폴더가 없으면 만들고, 빠진 기본 파일·템플릿을 채운 뒤 업무를 모두 읽는다.</summary>
         public static Workspace Open(string root, string defaultTemplatesDir)
@@ -61,7 +93,26 @@ namespace TSWorkBench.Storage
             CopyMissingTemplates(defaultTemplatesDir, ws.TemplatesDir);
             ws.Items.LoadAll();
             ws.Releases.LoadAll();
+            ws.LoadPrograms();
             return ws;
+        }
+
+        /// <summary>programs.json을 읽는다. 없으면 예전 기준 정보의 '프로그램' 목록과 배포 기록의 프로그램 이름으로 만든다.</summary>
+        private void LoadPrograms()
+        {
+            if (File.Exists(ProgramsPath))
+            {
+                Programs = JsonFile.Read<List<ProgramInfo>>(ProgramsPath) ?? new List<ProgramInfo>();
+                return;
+            }
+
+            var names = MasterData.Names(Masters.Programs).Concat(Releases.All.Select(r => r.Program))
+                .Where(n => !string.IsNullOrWhiteSpace(n)).Distinct(StringComparer.OrdinalIgnoreCase);
+            Programs = names.Select(n => new ProgramInfo { Name = n.Trim(), CreatedAt = DateTime.Now }).ToList();
+            if (Programs.Count > 0)
+            {
+                SavePrograms();
+            }
         }
 
         public void SaveSettings()

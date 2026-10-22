@@ -546,7 +546,33 @@ namespace TSWorkBench.Forms
             }
         }
 
+        /// <summary>배포 기록: 이 업무로 고친 코드를 새 버전으로 배포하거나, 이미 있는 버전을 설치한 것을 기록한다.</summary>
         private void btnDeploy_Click(object sender, EventArgs e)
+        {
+            var menu = DarkMenuRenderer.CreateMenu();
+            menu.Items.Add("새 버전 배포 (이 업무로 고친 코드)", null, (s, a) => NewReleaseFromCard());
+            menu.Items.Add("이미 있는 버전을 설치한 것 기록", null, (s, a) => DeployExistingFromCard());
+            menu.Closed += (s, a) => BeginInvoke(new Action(menu.Dispose));
+            menu.Show(btnDeploy, 0, btnDeploy.Height);
+        }
+
+        private void NewReleaseFromCard()
+        {
+            if (!EnsureSaved())
+            {
+                return;
+            }
+
+            using (var dialog = new NewReleaseDialog(ws, null, item))
+            {
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    AddDeploymentLine(dialog.ResultLine, dialog.Record.Program + " v" + dialog.Record.Version + " 배포", DateTime.Now);
+                }
+            }
+        }
+
+        private void DeployExistingFromCard()
         {
             if (!EnsureSaved())
             {
@@ -562,14 +588,19 @@ namespace TSWorkBench.Forms
 
                 var r = dialog.Release;
                 var d = dialog.Saved;
-                var line = "배포: " + r.Key + " → " + d.Equipment + " (" + ReportGenerator.Minute(d.DeployedAt) + ")"
-                           + (r.PackagePath.Length > 0 ? "  배포본 " + r.PackagePath : "");
-                txtChangedFiles.Text = string.IsNullOrWhiteSpace(txtChangedFiles.Text) ? line : txtChangedFiles.Text.TrimEnd() + "\r\n" + line;
-                item.Timeline.Add(new TimelineEntry { Start = d.DeployedAt, Kind = TimelineKind.OnSite, Text = r.Key + " 설치" });
-                FillTimeline();
-                secAction.Checked = true;
-                TrySave();
+                var line = "배포: " + r.Key + (r.Commit.Length > 0 ? " (커밋 " + r.Commit + ")" : "") + " → " + d.Equipment
+                           + " (" + ReportGenerator.Minute(d.DeployedAt) + ")" + (r.PackagePath.Length > 0 ? "  배포본 " + r.PackagePath : "");
+                AddDeploymentLine(line, r.Key + " 설치", d.DeployedAt);
             }
+        }
+
+        private void AddDeploymentLine(string line, string timelineText, DateTime when)
+        {
+            txtChangedFiles.Text = string.IsNullOrWhiteSpace(txtChangedFiles.Text) ? line : txtChangedFiles.Text.TrimEnd() + "\r\n" + line;
+            item.Timeline.Add(new TimelineEntry { Start = when, Kind = TimelineKind.OnSite, Text = timelineText });
+            FillTimeline();
+            secAction.Checked = true;
+            TrySave();
         }
 
         // ── 작업 이력 ────────────────────────────────────────
@@ -774,16 +805,14 @@ namespace TSWorkBench.Forms
 
         private void btnAttachFolder_Click(object sender, EventArgs e)
         {
-            using (var dialog = new FolderBrowserDialog { Description = "원본 위치만 기록할 폴더" })
+            var folder = FolderPicker.Pick(this, "원본 위치만 기록할 폴더 (주소창에 \\\\NAS\\공유 입력 가능)", null);
+            if (folder == null)
             {
-                if (dialog.ShowDialog(this) != DialogResult.OK)
-                {
-                    return;
-                }
-
-                item.Attachments.Add(new AttachmentRef { Name = Path.GetFileName(dialog.SelectedPath), Path = dialog.SelectedPath, Note = "폴더" });
-                FillAttachments();
+                return;
             }
+
+            item.Attachments.Add(new AttachmentRef { Name = Path.GetFileName(folder.TrimEnd('\\')), Path = folder, Note = "폴더" });
+            FillAttachments();
         }
 
         private void btnAttachPaste_Click(object sender, EventArgs e)

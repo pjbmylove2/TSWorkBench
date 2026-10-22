@@ -28,16 +28,29 @@ namespace TSWorkBench.Pages
         /// </summary>
         private void InitializeComponent()
         {
-            this.pnlTop = new System.Windows.Forms.Panel();
-            this.flpFilter = new System.Windows.Forms.FlowLayoutPanel();
-            this.viewReleases = new TSWorkBench.Theme.NavButton();
-            this.viewCurrent = new TSWorkBench.Theme.NavButton();
+            this.flpActions = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnRegister = new TSWorkBench.Theme.DarkButton();
+            this.btnNewRelease = new TSWorkBench.Theme.DarkButton();
+            this.btnDeploy = new TSWorkBench.Theme.DarkButton();
+            this.btnImport = new TSWorkBench.Theme.DarkButton();
+            this.btnBackup = new TSWorkBench.Theme.DarkButton();
+            this.btnStore = new TSWorkBench.Theme.DarkButton();
+            this.flpView = new System.Windows.Forms.FlowLayoutPanel();
+            this.viewStatus = new TSWorkBench.Theme.NavButton();
+            this.viewVersions = new TSWorkBench.Theme.NavButton();
+            this.viewPrograms = new TSWorkBench.Theme.NavButton();
             this.lblProgram = new System.Windows.Forms.Label();
             this.cboProgram = new TSWorkBench.Theme.DarkComboBox();
-            this.flpActions = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnStore = new TSWorkBench.Theme.DarkButton();
-            this.btnDeploy = new TSWorkBench.Theme.DarkButton();
-            this.btnRelease = new TSWorkBench.Theme.DarkButton();
+            this.gridStatus = new TSWorkBench.Theme.DarkGrid();
+            this.colStCustomer = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStSite = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStEquipment = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStProgram = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStLatest = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStState = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStDeployedAt = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStItem = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.split = new System.Windows.Forms.SplitContainer();
             this.gridReleases = new TSWorkBench.Theme.DarkGrid();
             this.colProgram = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -53,135 +66,239 @@ namespace TSWorkBench.Pages
             this.colNote = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.lblDeployTitle = new System.Windows.Forms.Label();
             this.txtDetail = new System.Windows.Forms.TextBox();
-            this.gridCurrent = new TSWorkBench.Theme.DarkGrid();
-            this.colCurCustomer = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCurSite = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCurEquipment = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCurProgram = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCurVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCurDeployedAt = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCurItem = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.pnlTop.SuspendLayout();
-            this.flpFilter.SuspendLayout();
+            this.gridPrograms = new TSWorkBench.Theme.DarkGrid();
+            this.colPgName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPgLatest = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPgSites = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPgState = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPgCode = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPgRemote = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lblHelp = new System.Windows.Forms.Label();
             this.flpActions.SuspendLayout();
+            this.flpView.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridStatus)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
             this.split.Panel1.SuspendLayout();
             this.split.Panel2.SuspendLayout();
             this.split.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridReleases)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridDeploy)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridCurrent)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridPrograms)).BeginInit();
             this.SuspendLayout();
             //
-            // pnlTop
+            // flpActions
             //
-            this.pnlTop.Controls.Add(this.flpFilter);
-            this.pnlTop.Controls.Add(this.flpActions);
-            this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlTop.Location = new System.Drawing.Point(0, 0);
-            this.pnlTop.Name = "pnlTop";
-            this.pnlTop.Size = new System.Drawing.Size(1100, 54);
-            this.pnlTop.TabIndex = 0;
+            this.flpActions.Controls.Add(this.btnRegister);
+            this.flpActions.Controls.Add(this.btnNewRelease);
+            this.flpActions.Controls.Add(this.btnDeploy);
+            this.flpActions.Controls.Add(this.btnImport);
+            this.flpActions.Controls.Add(this.btnBackup);
+            this.flpActions.Controls.Add(this.btnStore);
+            this.flpActions.Dock = System.Windows.Forms.DockStyle.Top;
+            this.flpActions.Name = "flpActions";
+            this.flpActions.Size = new System.Drawing.Size(1180, 52);
+            this.flpActions.TabIndex = 0;
+            this.flpActions.WrapContents = false;
             //
-            // flpFilter
+            // btnRegister
             //
-            this.flpFilter.Controls.Add(this.viewReleases);
-            this.flpFilter.Controls.Add(this.viewCurrent);
-            this.flpFilter.Controls.Add(this.lblProgram);
-            this.flpFilter.Controls.Add(this.cboProgram);
-            this.flpFilter.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flpFilter.Name = "flpFilter";
-            this.flpFilter.TabIndex = 0;
-            this.flpFilter.WrapContents = false;
+            this.btnRegister.Margin = new System.Windows.Forms.Padding(0, 2, 8, 0);
+            this.btnRegister.Name = "btnRegister";
+            this.btnRegister.Size = new System.Drawing.Size(170, 40);
+            this.btnRegister.TabIndex = 0;
+            this.btnRegister.Text = "① 프로그램 등록";
+            this.btnRegister.Click += new System.EventHandler(this.btnRegister_Click);
             //
-            // viewReleases
+            // btnNewRelease
             //
-            this.viewReleases.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
-            this.viewReleases.BarAtBottom = true;
-            this.viewReleases.Margin = new System.Windows.Forms.Padding(0, 0, 4, 0);
-            this.viewReleases.Name = "viewReleases";
-            this.viewReleases.Padding = new System.Windows.Forms.Padding(0);
-            this.viewReleases.Size = new System.Drawing.Size(130, 40);
-            this.viewReleases.TabIndex = 0;
-            this.viewReleases.Text = "배포본";
-            this.viewReleases.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.viewReleases.CheckedChanged += new System.EventHandler(this.view_CheckedChanged);
+            this.btnNewRelease.Accent = true;
+            this.btnNewRelease.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btnNewRelease.Margin = new System.Windows.Forms.Padding(0, 2, 8, 0);
+            this.btnNewRelease.Name = "btnNewRelease";
+            this.btnNewRelease.Size = new System.Drawing.Size(180, 40);
+            this.btnNewRelease.TabIndex = 1;
+            this.btnNewRelease.Text = "② 새 버전 배포";
+            this.btnNewRelease.Click += new System.EventHandler(this.btnNewRelease_Click);
             //
-            // viewCurrent
+            // btnDeploy
             //
-            this.viewCurrent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
-            this.viewCurrent.BarAtBottom = true;
-            this.viewCurrent.Margin = new System.Windows.Forms.Padding(0, 0, 24, 0);
-            this.viewCurrent.Name = "viewCurrent";
-            this.viewCurrent.Padding = new System.Windows.Forms.Padding(0);
-            this.viewCurrent.Size = new System.Drawing.Size(160, 40);
-            this.viewCurrent.TabIndex = 1;
-            this.viewCurrent.Text = "설비별 현재 버전";
-            this.viewCurrent.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.viewCurrent.CheckedChanged += new System.EventHandler(this.view_CheckedChanged);
+            this.btnDeploy.Margin = new System.Windows.Forms.Padding(0, 2, 24, 0);
+            this.btnDeploy.Name = "btnDeploy";
+            this.btnDeploy.Size = new System.Drawing.Size(210, 40);
+            this.btnDeploy.TabIndex = 2;
+            this.btnDeploy.Text = "③ 다른 곳에 설치 기록";
+            this.btnDeploy.Click += new System.EventHandler(this.btnDeploy_Click);
+            //
+            // btnImport
+            //
+            this.btnImport.Margin = new System.Windows.Forms.Padding(0, 2, 8, 0);
+            this.btnImport.Name = "btnImport";
+            this.btnImport.Size = new System.Drawing.Size(170, 40);
+            this.btnImport.TabIndex = 3;
+            this.btnImport.Text = "과거 버전 가져오기";
+            this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
+            //
+            // btnBackup
+            //
+            this.btnBackup.Margin = new System.Windows.Forms.Padding(0, 2, 8, 0);
+            this.btnBackup.Name = "btnBackup";
+            this.btnBackup.Size = new System.Drawing.Size(150, 40);
+            this.btnBackup.TabIndex = 4;
+            this.btnBackup.Text = "NAS 코드 백업";
+            this.btnBackup.Click += new System.EventHandler(this.btnBackup_Click);
+            //
+            // btnStore
+            //
+            this.btnStore.Margin = new System.Windows.Forms.Padding(0, 2, 0, 0);
+            this.btnStore.Name = "btnStore";
+            this.btnStore.Size = new System.Drawing.Size(130, 40);
+            this.btnStore.TabIndex = 5;
+            this.btnStore.Text = "보관소 열기";
+            this.btnStore.Click += new System.EventHandler(this.btnStore_Click);
+            //
+            // flpView
+            //
+            this.flpView.Controls.Add(this.viewStatus);
+            this.flpView.Controls.Add(this.viewVersions);
+            this.flpView.Controls.Add(this.viewPrograms);
+            this.flpView.Controls.Add(this.lblProgram);
+            this.flpView.Controls.Add(this.cboProgram);
+            this.flpView.Dock = System.Windows.Forms.DockStyle.Top;
+            this.flpView.Name = "flpView";
+            this.flpView.Size = new System.Drawing.Size(1180, 50);
+            this.flpView.TabIndex = 1;
+            this.flpView.WrapContents = false;
+            //
+            // viewStatus
+            //
+            this.viewStatus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.viewStatus.BarAtBottom = true;
+            this.viewStatus.Margin = new System.Windows.Forms.Padding(0, 4, 4, 0);
+            this.viewStatus.Name = "viewStatus";
+            this.viewStatus.Padding = new System.Windows.Forms.Padding(0);
+            this.viewStatus.Size = new System.Drawing.Size(170, 40);
+            this.viewStatus.TabIndex = 0;
+            this.viewStatus.Text = "설치 현황 (어디에 몇 버전)";
+            this.viewStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.viewStatus.CheckedChanged += new System.EventHandler(this.view_CheckedChanged);
+            //
+            // viewVersions
+            //
+            this.viewVersions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.viewVersions.BarAtBottom = true;
+            this.viewVersions.Margin = new System.Windows.Forms.Padding(0, 4, 4, 0);
+            this.viewVersions.Name = "viewVersions";
+            this.viewVersions.Padding = new System.Windows.Forms.Padding(0);
+            this.viewVersions.Size = new System.Drawing.Size(130, 40);
+            this.viewVersions.TabIndex = 1;
+            this.viewVersions.Text = "버전 목록";
+            this.viewVersions.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.viewVersions.CheckedChanged += new System.EventHandler(this.view_CheckedChanged);
+            //
+            // viewPrograms
+            //
+            this.viewPrograms.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.viewPrograms.BarAtBottom = true;
+            this.viewPrograms.Margin = new System.Windows.Forms.Padding(0, 4, 32, 0);
+            this.viewPrograms.Name = "viewPrograms";
+            this.viewPrograms.Padding = new System.Windows.Forms.Padding(0);
+            this.viewPrograms.Size = new System.Drawing.Size(150, 40);
+            this.viewPrograms.TabIndex = 2;
+            this.viewPrograms.Text = "프로그램 · 코드";
+            this.viewPrograms.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.viewPrograms.CheckedChanged += new System.EventHandler(this.view_CheckedChanged);
             //
             // lblProgram
             //
             this.lblProgram.AutoSize = true;
             this.lblProgram.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
-            this.lblProgram.Margin = new System.Windows.Forms.Padding(0, 12, 6, 0);
+            this.lblProgram.Margin = new System.Windows.Forms.Padding(0, 16, 6, 0);
             this.lblProgram.Name = "lblProgram";
             this.lblProgram.Text = "프로그램";
             //
             // cboProgram
             //
             this.cboProgram.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboProgram.Margin = new System.Windows.Forms.Padding(0, 8, 0, 0);
+            this.cboProgram.Margin = new System.Windows.Forms.Padding(0, 12, 0, 0);
             this.cboProgram.Name = "cboProgram";
-            this.cboProgram.Size = new System.Drawing.Size(170, 25);
-            this.cboProgram.TabIndex = 2;
+            this.cboProgram.Size = new System.Drawing.Size(200, 25);
+            this.cboProgram.TabIndex = 3;
             this.cboProgram.SelectedIndexChanged += new System.EventHandler(this.cboProgram_SelectedIndexChanged);
             //
-            // flpActions
+            // gridStatus
             //
-            this.flpActions.Controls.Add(this.btnStore);
-            this.flpActions.Controls.Add(this.btnDeploy);
-            this.flpActions.Controls.Add(this.btnRelease);
-            this.flpActions.Dock = System.Windows.Forms.DockStyle.Right;
-            this.flpActions.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flpActions.Name = "flpActions";
-            this.flpActions.Size = new System.Drawing.Size(560, 54);
-            this.flpActions.TabIndex = 1;
-            this.flpActions.WrapContents = false;
+            this.gridStatus.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colStCustomer,
+            this.colStSite,
+            this.colStEquipment,
+            this.colStProgram,
+            this.colStVersion,
+            this.colStLatest,
+            this.colStState,
+            this.colStDeployedAt,
+            this.colStItem});
+            this.gridStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridStatus.Name = "gridStatus";
+            this.gridStatus.TabIndex = 2;
             //
-            // btnStore
+            // colStCustomer
             //
-            this.btnStore.Margin = new System.Windows.Forms.Padding(8, 2, 0, 0);
-            this.btnStore.Name = "btnStore";
-            this.btnStore.Size = new System.Drawing.Size(130, 36);
-            this.btnStore.TabIndex = 2;
-            this.btnStore.Text = "보관소 열기";
-            this.btnStore.Click += new System.EventHandler(this.btnStore_Click);
+            this.colStCustomer.HeaderText = "고객사";
+            this.colStCustomer.Name = "colStCustomer";
+            this.colStCustomer.Width = 110;
             //
-            // btnDeploy
+            // colStSite
             //
-            this.btnDeploy.Margin = new System.Windows.Forms.Padding(8, 2, 0, 0);
-            this.btnDeploy.Name = "btnDeploy";
-            this.btnDeploy.Size = new System.Drawing.Size(150, 36);
-            this.btnDeploy.TabIndex = 1;
-            this.btnDeploy.Text = "설비에 설치 기록";
-            this.btnDeploy.Click += new System.EventHandler(this.btnDeploy_Click);
+            this.colStSite.HeaderText = "사이트/라인";
+            this.colStSite.Name = "colStSite";
+            this.colStSite.Width = 150;
             //
-            // btnRelease
+            // colStEquipment
             //
-            this.btnRelease.Accent = true;
-            this.btnRelease.Margin = new System.Windows.Forms.Padding(8, 2, 0, 0);
-            this.btnRelease.Name = "btnRelease";
-            this.btnRelease.Size = new System.Drawing.Size(220, 36);
-            this.btnRelease.TabIndex = 0;
-            this.btnRelease.Text = "+ 배포본 등록 · 패키지 만들기";
-            this.btnRelease.Click += new System.EventHandler(this.btnRelease_Click);
+            this.colStEquipment.HeaderText = "설비";
+            this.colStEquipment.Name = "colStEquipment";
+            this.colStEquipment.Width = 150;
+            //
+            // colStProgram
+            //
+            this.colStProgram.HeaderText = "프로그램";
+            this.colStProgram.Name = "colStProgram";
+            this.colStProgram.Width = 130;
+            //
+            // colStVersion
+            //
+            this.colStVersion.HeaderText = "설치 버전";
+            this.colStVersion.Name = "colStVersion";
+            this.colStVersion.Width = 90;
+            //
+            // colStLatest
+            //
+            this.colStLatest.HeaderText = "최신 버전";
+            this.colStLatest.Name = "colStLatest";
+            this.colStLatest.Width = 90;
+            //
+            // colStState
+            //
+            this.colStState.HeaderText = "상태";
+            this.colStState.Name = "colStState";
+            this.colStState.Width = 120;
+            //
+            // colStDeployedAt
+            //
+            this.colStDeployedAt.HeaderText = "설치 일시";
+            this.colStDeployedAt.Name = "colStDeployedAt";
+            this.colStDeployedAt.Width = 140;
+            //
+            // colStItem
+            //
+            this.colStItem.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colStItem.HeaderText = "관련 업무";
+            this.colStItem.Name = "colStItem";
             //
             // split
             //
             this.split.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.split.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.split.Location = new System.Drawing.Point(0, 54);
             this.split.Name = "split";
             //
             // split.Panel1
@@ -196,10 +313,11 @@ namespace TSWorkBench.Pages
             this.split.Panel2.Controls.Add(this.lblDeployTitle);
             this.split.Panel2.Controls.Add(this.txtDetail);
             this.split.Panel2.Padding = new System.Windows.Forms.Padding(14, 10, 10, 10);
-            this.split.Size = new System.Drawing.Size(1100, 596);
+            this.split.Size = new System.Drawing.Size(1180, 540);
             this.split.SplitterDistance = 480;
             this.split.SplitterWidth = 3;
-            this.split.TabIndex = 1;
+            this.split.TabIndex = 3;
+            this.split.Visible = false;
             //
             // gridReleases
             //
@@ -291,7 +409,7 @@ namespace TSWorkBench.Pages
             this.lblDeployTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblDeployTitle.Font = new System.Drawing.Font("맑은 고딕", 10.5F, System.Drawing.FontStyle.Bold);
             this.lblDeployTitle.Name = "lblDeployTitle";
-            this.lblDeployTitle.Size = new System.Drawing.Size(593, 36);
+            this.lblDeployTitle.Size = new System.Drawing.Size(673, 36);
             this.lblDeployTitle.TabIndex = 1;
             this.lblDeployTitle.Text = "설치 이력  (오른쪽 클릭: 되돌림 표시)";
             this.lblDeployTitle.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
@@ -307,81 +425,87 @@ namespace TSWorkBench.Pages
             this.txtDetail.Name = "txtDetail";
             this.txtDetail.ReadOnly = true;
             this.txtDetail.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtDetail.Size = new System.Drawing.Size(593, 230);
+            this.txtDetail.Size = new System.Drawing.Size(673, 220);
             this.txtDetail.TabIndex = 0;
             //
-            // gridCurrent
+            // gridPrograms
             //
-            this.gridCurrent.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.colCurCustomer,
-            this.colCurSite,
-            this.colCurEquipment,
-            this.colCurProgram,
-            this.colCurVersion,
-            this.colCurDeployedAt,
-            this.colCurItem});
-            this.gridCurrent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridCurrent.Location = new System.Drawing.Point(0, 54);
-            this.gridCurrent.Name = "gridCurrent";
-            this.gridCurrent.TabIndex = 2;
-            this.gridCurrent.Visible = false;
+            this.gridPrograms.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colPgName,
+            this.colPgLatest,
+            this.colPgSites,
+            this.colPgState,
+            this.colPgCode,
+            this.colPgRemote});
+            this.gridPrograms.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridPrograms.Name = "gridPrograms";
+            this.gridPrograms.TabIndex = 4;
+            this.gridPrograms.Visible = false;
+            this.gridPrograms.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gridPrograms_CellDoubleClick);
             //
-            // colCurCustomer
+            // colPgName
             //
-            this.colCurCustomer.HeaderText = "고객사";
-            this.colCurCustomer.Name = "colCurCustomer";
-            this.colCurCustomer.Width = 120;
+            this.colPgName.HeaderText = "프로그램";
+            this.colPgName.Name = "colPgName";
+            this.colPgName.Width = 140;
             //
-            // colCurSite
+            // colPgLatest
             //
-            this.colCurSite.HeaderText = "사이트/라인";
-            this.colCurSite.Name = "colCurSite";
-            this.colCurSite.Width = 170;
+            this.colPgLatest.HeaderText = "최신 버전";
+            this.colPgLatest.Name = "colPgLatest";
+            this.colPgLatest.Width = 90;
             //
-            // colCurEquipment
+            // colPgSites
             //
-            this.colCurEquipment.HeaderText = "설비";
-            this.colCurEquipment.Name = "colCurEquipment";
-            this.colCurEquipment.Width = 160;
+            this.colPgSites.HeaderText = "설치 위치";
+            this.colPgSites.Name = "colPgSites";
+            this.colPgSites.Width = 90;
             //
-            // colCurProgram
+            // colPgState
             //
-            this.colCurProgram.HeaderText = "프로그램";
-            this.colCurProgram.Name = "colCurProgram";
-            this.colCurProgram.Width = 140;
+            this.colPgState.HeaderText = "코드 상태";
+            this.colPgState.Name = "colPgState";
+            this.colPgState.Width = 230;
             //
-            // colCurVersion
+            // colPgCode
             //
-            this.colCurVersion.HeaderText = "현재 버전";
-            this.colCurVersion.Name = "colCurVersion";
-            this.colCurVersion.Width = 100;
+            this.colPgCode.HeaderText = "코드 폴더";
+            this.colPgCode.Name = "colPgCode";
+            this.colPgCode.Width = 320;
             //
-            // colCurDeployedAt
+            // colPgRemote
             //
-            this.colCurDeployedAt.HeaderText = "설치 일시";
-            this.colCurDeployedAt.Name = "colCurDeployedAt";
-            this.colCurDeployedAt.Width = 140;
+            this.colPgRemote.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colPgRemote.HeaderText = "NAS 코드 백업";
+            this.colPgRemote.Name = "colPgRemote";
             //
-            // colCurItem
+            // lblHelp
             //
-            this.colCurItem.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colCurItem.HeaderText = "관련 업무";
-            this.colCurItem.Name = "colCurItem";
+            this.lblHelp.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lblHelp.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            this.lblHelp.Name = "lblHelp";
+            this.lblHelp.Size = new System.Drawing.Size(1180, 44);
+            this.lblHelp.TabIndex = 5;
+            this.lblHelp.Text = "도움말";
+            this.lblHelp.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // ReleasesPage
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.Controls.Add(this.gridStatus);
             this.Controls.Add(this.split);
-            this.Controls.Add(this.gridCurrent);
-            this.Controls.Add(this.pnlTop);
+            this.Controls.Add(this.gridPrograms);
+            this.Controls.Add(this.lblHelp);
+            this.Controls.Add(this.flpView);
+            this.Controls.Add(this.flpActions);
             this.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
             this.Name = "ReleasesPage";
-            this.Size = new System.Drawing.Size(1100, 650);
-            this.pnlTop.ResumeLayout(false);
-            this.flpFilter.ResumeLayout(false);
-            this.flpFilter.PerformLayout();
+            this.Size = new System.Drawing.Size(1180, 700);
             this.flpActions.ResumeLayout(false);
+            this.flpView.ResumeLayout(false);
+            this.flpView.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridStatus)).EndInit();
             this.split.Panel1.ResumeLayout(false);
             this.split.Panel2.ResumeLayout(false);
             this.split.Panel2.PerformLayout();
@@ -389,23 +513,36 @@ namespace TSWorkBench.Pages
             this.split.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridReleases)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridDeploy)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridCurrent)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridPrograms)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel pnlTop;
-        private System.Windows.Forms.FlowLayoutPanel flpFilter;
-        private TSWorkBench.Theme.NavButton viewReleases;
-        private TSWorkBench.Theme.NavButton viewCurrent;
+        private System.Windows.Forms.FlowLayoutPanel flpActions;
+        private TSWorkBench.Theme.DarkButton btnRegister;
+        private TSWorkBench.Theme.DarkButton btnNewRelease;
+        private TSWorkBench.Theme.DarkButton btnDeploy;
+        private TSWorkBench.Theme.DarkButton btnImport;
+        private TSWorkBench.Theme.DarkButton btnBackup;
+        private TSWorkBench.Theme.DarkButton btnStore;
+        private System.Windows.Forms.FlowLayoutPanel flpView;
+        private TSWorkBench.Theme.NavButton viewStatus;
+        private TSWorkBench.Theme.NavButton viewVersions;
+        private TSWorkBench.Theme.NavButton viewPrograms;
         private System.Windows.Forms.Label lblProgram;
         private TSWorkBench.Theme.DarkComboBox cboProgram;
-        private System.Windows.Forms.FlowLayoutPanel flpActions;
-        private TSWorkBench.Theme.DarkButton btnStore;
-        private TSWorkBench.Theme.DarkButton btnDeploy;
-        private TSWorkBench.Theme.DarkButton btnRelease;
+        private TSWorkBench.Theme.DarkGrid gridStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStCustomer;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStSite;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStEquipment;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStProgram;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStVersion;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStLatest;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStState;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStDeployedAt;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStItem;
         private System.Windows.Forms.SplitContainer split;
         private TSWorkBench.Theme.DarkGrid gridReleases;
         private System.Windows.Forms.DataGridViewTextBoxColumn colProgram;
@@ -421,13 +558,13 @@ namespace TSWorkBench.Pages
         private System.Windows.Forms.DataGridViewTextBoxColumn colNote;
         private System.Windows.Forms.Label lblDeployTitle;
         private System.Windows.Forms.TextBox txtDetail;
-        private TSWorkBench.Theme.DarkGrid gridCurrent;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colCurCustomer;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colCurSite;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colCurEquipment;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colCurProgram;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colCurVersion;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colCurDeployedAt;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colCurItem;
+        private TSWorkBench.Theme.DarkGrid gridPrograms;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPgName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPgLatest;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPgSites;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPgState;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPgCode;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPgRemote;
+        private System.Windows.Forms.Label lblHelp;
     }
 }

@@ -453,8 +453,7 @@ namespace TSWorkBench.Pages
             "고객사",
             "사이트 / 라인",
             "설비",
-            "대상 시스템",
-            "프로그램 (배포용)"});
+            "대상 시스템"});
             this.cboMasterKind.Location = new System.Drawing.Point(0, 50);
             this.cboMasterKind.Name = "cboMasterKind";
             this.cboMasterKind.Size = new System.Drawing.Size(180, 25);

@@ -76,13 +76,8 @@ namespace TSWorkBench
         /// <summary>데이터 폴더 고르기. 취소하면 null.</summary>
         public static string AskDataFolder(IWin32Window owner, string initial)
         {
-            using (var dialog = new FolderBrowserDialog())
-            {
-                dialog.Description = "업무 데이터를 저장할 폴더를 선택하세요.\n(OneDrive 등 백업되는 위치를 권장합니다. 없으면 '새 폴더 만들기')";
-                dialog.ShowNewFolderButton = true;
-                dialog.SelectedPath = initial ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                return dialog.ShowDialog(owner) == DialogResult.OK ? dialog.SelectedPath : null;
-            }
+            return FolderPicker.Pick(owner, "업무 데이터 폴더 선택 (OneDrive·NAS 등 백업되는 위치 권장, 주소창에 \\\\NAS\\공유 입력 가능)",
+                initial ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
         }
 
         private static string ArgValue(string[] args, string name)

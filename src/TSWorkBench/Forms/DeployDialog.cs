@@ -52,7 +52,7 @@ namespace TSWorkBench.Forms
             var choice = cboRelease.SelectedItem as Choice<ReleaseRecord>;
             if (choice == null)
             {
-                MessageBox.Show(this, "먼저 배포 이력 화면에서 배포본을 등록하세요.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(this, "먼저 프로그램 · 배포 화면에서 ① 프로그램 등록 또는 ② 새 버전 배포로 버전을 만드세요.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 

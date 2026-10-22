@@ -60,7 +60,7 @@ namespace TSWorkBench.Forms
 
         public static IEnumerable<string> ProgramNames(Workspace ws)
         {
-            return MasterData.Names(ws.Masters.Programs).Concat(ws.Releases.All.Select(r => r.Program));
+            return ws.Programs.Select(p => p.Name).Concat(ws.Releases.All.Select(r => r.Program));
         }
 
         public static IEnumerable<string> SystemNames(Workspace ws)

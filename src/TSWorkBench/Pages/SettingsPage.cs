@@ -74,8 +74,7 @@ namespace TSWorkBench.Pages
                 case 0: return Ws.Masters.Customers;
                 case 1: return Ws.Masters.Sites;
                 case 2: return Ws.Masters.Equipments;
-                case 3: return Ws.Masters.Systems;
-                default: return Ws.Masters.Programs;
+                default: return Ws.Masters.Systems;
             }
         }
 
@@ -221,12 +220,10 @@ namespace TSWorkBench.Pages
 
         private void PickFolder(TextBox target, string description)
         {
-            using (var dialog = new FolderBrowserDialog { Description = description, SelectedPath = target.Text, ShowNewFolderButton = true })
+            var folder = FolderPicker.Pick(this, description, target.Text);
+            if (folder != null)
             {
-                if (dialog.ShowDialog(this) == DialogResult.OK)
-                {
-                    target.Text = dialog.SelectedPath;
-                }
+                target.Text = folder;
             }
         }
 

@@ -29,12 +29,10 @@ namespace TSWorkBench.Pages
 
         private void btnBrowse_Click(object sender, EventArgs e)
         {
-            using (var dialog = new FolderBrowserDialog { Description = "과거 업무 자료가 들어 있는 최상위 폴더", SelectedPath = txtFolder.Text })
+            var folder = FolderPicker.Pick(this, "과거 업무 자료가 들어 있는 최상위 폴더", txtFolder.Text);
+            if (folder != null)
             {
-                if (dialog.ShowDialog(this) == DialogResult.OK)
-                {
-                    txtFolder.Text = dialog.SelectedPath;
-                }
+                txtFolder.Text = folder;
             }
         }
 

@@ -105,7 +105,7 @@ namespace TSWorkBench.Forms
             this.navReleases.Name = "navReleases";
             this.navReleases.Size = new System.Drawing.Size(210, 46);
             this.navReleases.TabIndex = 6;
-            this.navReleases.Text = "배포 이력 (버전·설비)";
+            this.navReleases.Text = "프로그램 · 배포";
             //
             // navKnowledge
             //

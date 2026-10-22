@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TSWorkBench.Models;
@@ -33,6 +34,7 @@ namespace TSWorkBench.Checks
                 ImportChecks();
                 ReportChecks(root);
                 FeatureChecks(root + "_features");
+                ProgramChecks(root + "_programs");
             }
             catch (Exception ex)
             {
@@ -342,6 +344,175 @@ namespace TSWorkBench.Checks
                 {
                     Directory.Delete(root, true);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 실제 git으로 사용자 시나리오: OCR 기준본 1.0.0을 ESWA·ESHD·ESOT가 사용 → ESWA만 1.1.0 배포 →
+        /// 설치 현황에서 ESHD·ESOT는 업데이트 가능. 과거 zip 가져오기, 기존 저장소 등록, NAS(임시 bare) 백업.
+        /// </summary>
+        private static void ProgramChecks(string root)
+        {
+            if (!GitRunner.IsAvailable)
+            {
+                Fail("git이 없어 프로그램 검증을 건너뜀");
+                return;
+            }
+
+            try
+            {
+                var now = new DateTime(2026, 10, 22, 18, 0, 0);
+                var ws = Workspace.Open(Path.Combine(root, "data"), Templates);
+                ws.Settings.ReleaseStore = Path.Combine(root, "NAS", "TSWork", "Releases");
+                Check("Git 백업 위치 자동 = 보관소 옆 Git", ws.GitStore == Path.Combine(root, "NAS", "TSWork", "Git"), ws.GitStore);
+
+                Check("버전 계산", VersionUtil.Next("1.0.0", VersionStep.Patch) == "1.0.1" && VersionUtil.Next("1.0.3", VersionStep.Minor) == "1.1.0"
+                                  && VersionUtil.Next("1.4.2", VersionStep.Major) == "2.0.0" && VersionUtil.Latest(new[] { "1.2.0", "v1.10.0", "1.9.9" }) == "1.10.0");
+                Check("인수 감싸기", GitRunner.Quote("a b") == "\"a b\"" && GitRunner.Quote(@"C:\x y\") == "\"C:\\x y\\\\\"" && GitRunner.Quote("") == "\"\"");
+
+                // 코드 폴더 (아직 Git 아님) + 빌드 결과
+                var code = Path.Combine(root, "Source", "OCR");
+                Directory.CreateDirectory(Path.Combine(code, "OCR", "bin", "Release"));
+                File.WriteAllText(Path.Combine(code, "OCR.sln"), "sln");
+                File.WriteAllText(Path.Combine(code, "OCR", "Main.cs"), "class A { } // 기준");
+                File.WriteAllText(Path.Combine(code, "OCR", "bin", "Release", "OCR.exe"), "exe-1.0.0");
+                var ocr = new ProgramInfo
+                {
+                    Name = "OCR",
+                    CodeFolder = code,
+                    BuildFolder = Path.Combine(code, "OCR", "bin", "Release"),
+                    GitRemote = Path.Combine(ws.GitStore, "OCR.git")
+                };
+                var sites = new[] { "ESWA", "ESHD", "ESOT" }.Select(s => new Deployment { Customer = "LGES", Site = s, Equipment = "OCR 검사기" }).ToList();
+                var service = new ProgramService(ws);
+                var current = service.Register(ocr, "1.0.0", new DateTime(2025, 3, 1), sites, null);
+                var git = service.Git(ocr);
+                Check("등록: Git 저장소·기준본 태그", current == "1.0.0" && git.IsRepo && git.TagExists("v1.0.0") && git.IsClean);
+                Check("등록: bin은 기록 안 함", !git.Run("ls-files").Output.Contains("bin/"));
+                var baseRelease = ws.Releases.Find("OCR", "1.0.0");
+                Check("등록: 기준본 배포본(소스 zip·빌드 zip)", baseRelease != null
+                                                       && File.Exists(Path.Combine(baseRelease.PackagePath, "OCR_v1.0.0_source.zip"))
+                                                       && File.Exists(Path.Combine(baseRelease.PackagePath, "OCR_v1.0.0.zip")));
+                Check("등록: 3사이트 1.0.0 설치", service.InstallStatus().Count(r => r.Program == "OCR" && r.Version == "1.0.0") == 3);
+                Check("등록: NAS 백업", new GitRunner(ocr.GitRemote, "x").Run("rev-parse", "-q", "--verify", "refs/tags/v1.0.0").Ok);
+
+                // ESWA 요청 → 업무 카드 → VS에서 커밋 (여기서는 git으로 대신)
+                var card = ws.NewItem(WorkType.ProgramChange, now.AddDays(-2));
+                card.Title = "ESWA 검사 영역 이탈";
+                card.Site = "ESWA";
+                ws.Save(card);
+                File.WriteAllText(Path.Combine(code, "OCR", "Main.cs"), "class A { } // 수정");
+                Check("커밋 전에는 배포 거부", Throws(() => { ReleaseRecord ignored; service.NewRelease(new NewReleaseRequest { Program = "OCR", Version = "1.1.0" }, null, out ignored); }));
+                git.CommitAll(card.Id + " [ESWA] 검사 영역 이탈 수정", null);
+                File.WriteAllText(Path.Combine(code, "OCR", "bin", "Release", "OCR.exe"), "exe-1.1.0");
+
+                var pending = service.GetPending(ocr);
+                Check("새 버전 화면 정보: 최신 1.0.0·새 커밋 1개·업무 ID 인식", pending.LatestVersion == "1.0.0" && pending.NewCommits.Count == 1
+                                                                      && pending.WorkItemIds.SequenceEqual(new[] { card.Id }) && pending.UncommittedFiles.Count == 0
+                                                                      && pending.SuggestedNotes.Contains("검사 영역 이탈 수정"));
+                ReleaseRecord v110;
+                var line = service.NewRelease(new NewReleaseRequest
+                {
+                    Program = "OCR",
+                    Version = VersionUtil.Next(pending.LatestVersion, VersionStep.Minor),
+                    Notes = pending.SuggestedNotes,
+                    WorkItemIds = pending.WorkItemIds,
+                    Targets = { new Deployment { Customer = "LGES", Site = "ESWA", Equipment = "OCR 검사기" } },
+                    DeployedAt = now
+                }, null, out v110);
+                Check("배포: 태그·배포본·소스 zip", git.TagExists("v1.1.0") && File.Exists(Path.Combine(v110.PackagePath, "OCR_v1.1.0_source.zip")) && line.Contains("v1.1.0"));
+                using (var zip = System.IO.Compression.ZipFile.OpenRead(Path.Combine(v110.PackagePath, "OCR_v1.1.0_source.zip")))
+                {
+                    Check("소스 zip은 그 버전 코드", zip.Entries.Any(e => e.FullName == "OCR/Main.cs") && !zip.Entries.Any(e => e.FullName.Contains("bin/")));
+                }
+
+                var reCard = ws.Items.Find(card.Id);
+                Check("업무 카드 변경 내역 자동 기입", reCard.ChangedFiles.Contains("OCR v1.1.0") && reCard.ChangedFiles.Contains(v110.Commit));
+                var status = service.InstallStatus().Where(r => r.Program == "OCR").ToList();
+                Check("설치 현황: ESWA 1.1.0 최신, 나머지 1.0.0 업데이트 가능",
+                    status.Single(r => r.Site == "ESWA").Version == "1.1.0" && status.Single(r => r.Site == "ESWA").IsLatest
+                    && status.Where(r => r.Site != "ESWA").All(r => r.Version == "1.0.0" && !r.IsLatest && r.LatestVersion == "1.1.0"));
+                Check("낮은 버전 배포 거부", Throws(() => { ReleaseRecord ignored; service.NewRelease(new NewReleaseRequest { Program = "OCR", Version = "1.0.5" }, null, out ignored); }));
+                Check("NAS에 1.1.0", new GitRunner(ocr.GitRemote, "x").Run("rev-parse", "-q", "--verify", "refs/tags/v1.1.0").Ok);
+
+                // 과거 버전 zip 가져오기 (LineScan처럼 날짜별 zip만 있던 프로그램)
+                var zips = Path.Combine(root, "zips");
+                foreach (var day in new[] { "20221223", "20231213" })
+                {
+                    var src = Path.Combine(root, "src_" + day, "LineScan_" + day);
+                    Directory.CreateDirectory(src);
+                    File.WriteAllText(Path.Combine(src, "Scan.cs"), "// " + day);
+                    if (day == "20221223")
+                    {
+                        File.WriteAllText(Path.Combine(src, "Old.cs"), "// 다음 버전에서 삭제");
+                    }
+
+                    Directory.CreateDirectory(zips);
+                    System.IO.Compression.ZipFile.CreateFromDirectory(Path.GetDirectoryName(src), Path.Combine(zips, day + "_LineScan_현장적용본.zip"));
+                }
+
+                var lineScan = new ProgramInfo { Name = "LineScan", CodeFolder = Path.Combine(root, "Source", "LineScan") };
+                var emptyResult = service.Register(lineScan, "1.0.0", DateTime.Today, new List<Deployment>(), null);
+                Check("빈 폴더 등록: 프로그램만 저장", emptyResult == null && ws.FindProgram("LineScan") != null && Directory.Exists(lineScan.CodeFolder));
+                var lsCard = ws.NewItem(WorkType.ProgramChange, new DateTime(2023, 12, 11));
+                lsCard.Title = "포커스 알람";
+                ws.Save(lsCard);
+                service.ImportVersions(lineScan, new List<ImportVersion>
+                {
+                    new ImportVersion { SourcePath = Path.Combine(zips, "20231213_LineScan_현장적용본.zip"), Date = new DateTime(2023, 12, 13, 12, 0, 0), Version = "1.1.0", WorkItemId = lsCard.Id },
+                    new ImportVersion { SourcePath = Path.Combine(zips, "20221223_LineScan_현장적용본.zip"), Date = new DateTime(2022, 12, 23, 12, 0, 0), Version = "1.0.0", Note = "기준본" }
+                }, null);
+                var lsGit = service.Git(lineScan);
+                var tags = lsGit.Tags();
+                Check("가져오기: 날짜순 커밋·태그", tags.Select(t => t.Tag).SequenceEqual(new[] { "v1.0.0", "v1.1.0" })
+                                              && tags[0].Date.Date == new DateTime(2022, 12, 23) && tags[1].Subject.StartsWith(lsCard.Id));
+                Check("가져오기: 겉 폴더 벗기기·지워진 파일 반영", File.Exists(Path.Combine(lineScan.CodeFolder, "Scan.cs"))
+                                                           && !File.Exists(Path.Combine(lineScan.CodeFolder, "Old.cs"))
+                                                           && !Directory.Exists(Path.Combine(lineScan.CodeFolder, "LineScan_20231213")));
+                Check("가져오기: 배포 기록·카드 연결", ws.Releases.Find("LineScan", "1.1.0").WorkItemIds.Single() == lsCard.Id
+                                                 && ws.Items.Find(lsCard.Id).ChangedFiles.Contains("LineScan v1.1.0"));
+
+                // 이미 Git인 폴더 등록 (태그 v1.0.0 + 태그 없는 커밋 1개)
+                var existing = Path.Combine(root, "Source", "Existing");
+                var exGit = new GitRunner(existing, "x");
+                exGit.Init();
+                File.WriteAllText(Path.Combine(existing, "a.cs"), "1");
+                exGit.CommitAll("기준본", new DateTime(2022, 1, 1));
+                exGit.Tag("v1.0.0", "기준", null, new DateTime(2022, 1, 1));
+                File.WriteAllText(Path.Combine(existing, "a.cs"), "2");
+                exGit.CommitAll("TS-2023-12-0009 기능 추가", new DateTime(2023, 12, 13));
+                var exCurrent = service.Register(new ProgramInfo { Name = "Existing", CodeFolder = existing }, "1.0.0", new DateTime(2023, 12, 13), new List<Deployment>(), null);
+                Check("기존 저장소 등록: 태그 없는 커밋 → 1.1.0", exCurrent == "1.1.0" && ws.Releases.Find("Existing", "1.1.0").WorkItemIds.Single() == "TS-2023-12-0009"
+                                                               && ws.Releases.Find("Existing", "1.0.0") != null);
+
+                var reopened = Workspace.Open(Path.Combine(root, "data"), Templates);
+                Check("programs.json 저장·로드", reopened.Programs.Select(p => p.Name).OrderBy(n => n).SequenceEqual(new[] { "Existing", "LineScan", "OCR" }));
+                Check("전체 NAS 백업", new ProgramService(reopened).PushAll().Count == 0);
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    foreach (var f in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
+                    {
+                        File.SetAttributes(f, FileAttributes.Normal);
+                    }
+
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        private static bool Throws(Action action)
+        {
+            try
+            {
+                action();
+                return false;
+            }
+            catch (InvalidOperationException)
+            {
+                return true;
             }
         }
 

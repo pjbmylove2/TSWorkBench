@@ -67,6 +67,10 @@
     <Compile Include="Storage\BackupService.cs" />
     <Compile Include="Services\SimilarCases.cs" />
     <Compile Include="Services\ReleasePackager.cs" />
+    <Compile Include="Services\VersionUtil.cs" />
+    <Compile Include="Services\GitRunner.cs" />
+    <Compile Include="Services\ProgramService.cs" />
+    <Compile Include="Models\ProgramInfo.cs" />
     <Compile Include="Models\ReleaseRecord.cs" />
     <Compile Include="Storage\ReleaseRepository.cs" />
     <Compile Include="Forms\SimilarCasesForm.cs">
@@ -75,11 +79,23 @@
     <Compile Include="Forms\SimilarCasesForm.Designer.cs">
       <DependentUpon>SimilarCasesForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ReleaseDialog.cs">
+    <Compile Include="Forms\ProgramSetupDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\ReleaseDialog.Designer.cs">
-      <DependentUpon>ReleaseDialog.cs</DependentUpon>
+    <Compile Include="Forms\ProgramSetupDialog.Designer.cs">
+      <DependentUpon>ProgramSetupDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\NewReleaseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\NewReleaseDialog.Designer.cs">
+      <DependentUpon>NewReleaseDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ImportVersionsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ImportVersionsDialog.Designer.cs">
+      <DependentUpon>ImportVersionsDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\DeployDialog.cs">
       <SubType>Form</SubType>
@@ -125,6 +141,7 @@
     </Compile>
     <Compile Include="Theme\DarkMenuRenderer.cs" />
     <Compile Include="Forms\ItemActions.cs" />
+    <Compile Include="Forms\FolderPicker.cs" />
     <Compile Include="Forms\UiHelpers.cs" />
     <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>

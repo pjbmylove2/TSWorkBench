@@ -21,5 +21,11 @@ namespace TSWorkBench.Models
 
         /// <summary>배포본 보관소 (예: \\NAS\Releases). 프로그램\v버전\ 폴더가 여기에 만들어진다.</summary>
         public string ReleaseStore { get; set; } = "";
+
+        /// <summary>프로그램 코드 작업 폴더들의 상위 폴더 (예: D:\박종부\00.Source). 프로그램 등록 때 기본값.</summary>
+        public string SourceRoot { get; set; } = "";
+
+        /// <summary>NAS 코드 백업 저장소 폴더. 비우면 배포본 보관소 옆의 Git 폴더 (…\TSWork\Git).</summary>
+        public string GitStore { get; set; } = "";
     }
 }

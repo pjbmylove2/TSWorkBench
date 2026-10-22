@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TSWorkBench.Models;
 using TSWorkBench.Pages;
+using TSWorkBench.Services;
 using TSWorkBench.Storage;
 using TSWorkBench.Theme;
 
@@ -50,7 +51,7 @@ namespace TSWorkBench.Forms
             StartDailyBackup();
         }
 
-        /// <summary>오늘 백업이 없으면 뒤에서 만든다. 화면은 기다리지 않고, 실패는 오류 로그에만 남긴다.</summary>
+        /// <summary>오늘 백업이 없으면 뒤에서 만들고, 등록된 프로그램 코드를 NAS로 올린다. 화면은 기다리지 않고, 실패는 오류 로그에만 남긴다.</summary>
         private void StartDailyBackup()
         {
             var ws = workspace;
@@ -59,6 +60,14 @@ namespace TSWorkBench.Forms
                 try
                 {
                     BackupService.RunDaily(ws, DateTime.Now);
+                    if (GitRunner.IsAvailable)
+                    {
+                        // 커밋만 하고 NAS로 안 보낸 코드도 프로그램을 켤 때마다 자동으로 백업된다.
+                        foreach (var failure in new ProgramService(ws).PushAll())
+                        {
+                            ErrorLog.Write("NAS 코드 자동 백업 실패: " + failure);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
