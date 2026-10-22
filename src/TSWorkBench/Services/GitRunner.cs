@@ -315,6 +315,7 @@ namespace TSWorkBench.Services
                 new GitRunner(url, fallbackName).Must(null, "init", "--bare");
             }
 
+            Trust(url);
             var current = RemoteUrl();
             if (current.Length == 0)
             {
@@ -329,7 +330,27 @@ namespace TSWorkBench.Services
         /// <summary>커밋과 태그를 NAS로 보낸다.</summary>
         public void Push()
         {
+            Trust(RemoteUrl());
             Must(null, "push", "-u", "origin", "HEAD", "--tags");
+        }
+
+        /// <summary>
+        /// NAS 폴더는 소유자가 내 계정으로 보이지 않아 git이 "dubious ownership"으로 거부한다.
+        /// 그 저장소 하나만 사용자 git 설정(safe.directory)에 믿을 곳으로 올린다. VS2022의 푸시·가져오기도 같이 된다.
+        /// </summary>
+        public void Trust(string url)
+        {
+            if (string.IsNullOrEmpty(url) || !(url.StartsWith(@"\\") || Path.IsPathRooted(url)))
+            {
+                return;
+            }
+
+            var entry = url.TrimEnd('\\', '/').Replace('\\', '/');
+            var trusted = Lines(Run("config", "--global", "--get-all", "safe.directory").Output);
+            if (!trusted.Any(t => t == "*" || string.Equals(t.TrimEnd('/'), entry, StringComparison.OrdinalIgnoreCase)))
+            {
+                Must(null, "config", "--global", "--add", "safe.directory", entry);
+            }
         }
 
         private IEnumerable<string> Identity(IEnumerable<string> args)

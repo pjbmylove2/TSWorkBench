@@ -359,8 +359,14 @@ namespace TSWorkBench.Checks
                 return;
             }
 
+            // 사용자 git 설정(safe.directory)을 건드리지 않도록 검증용 설정 파일을 쓴다.
+            var globalConfig = Path.Combine(root, "gitconfig");
+            var savedGlobal = Environment.GetEnvironmentVariable("GIT_CONFIG_GLOBAL");
             try
             {
+                Directory.CreateDirectory(root);
+                File.WriteAllText(globalConfig, "");
+                Environment.SetEnvironmentVariable("GIT_CONFIG_GLOBAL", globalConfig);
                 var now = new DateTime(2026, 10, 22, 18, 0, 0);
                 var ws = Workspace.Open(Path.Combine(root, "data"), Templates);
                 ws.Settings.ReleaseStore = Path.Combine(root, "NAS", "TSWork", "Releases");
@@ -488,9 +494,13 @@ namespace TSWorkBench.Checks
                 var reopened = Workspace.Open(Path.Combine(root, "data"), Templates);
                 Check("programs.json 저장·로드", reopened.Programs.Select(p => p.Name).OrderBy(n => n).SequenceEqual(new[] { "Existing", "LineScan", "OCR" }));
                 Check("전체 NAS 백업", new ProgramService(reopened).PushAll().Count == 0);
+                var ocrRemote = Path.Combine(root, "NAS", "TSWork", "Git", "OCR.git").Replace('\\', '/');
+                var trusted = File.ReadAllText(globalConfig);
+                Check("NAS 저장소를 safe.directory에 한 번만 등록", trusted.Split('\n').Count(l => l.Trim().EndsWith(ocrRemote, StringComparison.OrdinalIgnoreCase)) == 1, trusted);
             }
             finally
             {
+                Environment.SetEnvironmentVariable("GIT_CONFIG_GLOBAL", savedGlobal);
                 if (Directory.Exists(root))
                 {
                     foreach (var f in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
