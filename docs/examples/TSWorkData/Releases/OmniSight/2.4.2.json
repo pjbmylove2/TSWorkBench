@@ -1,0 +1,13 @@
+{
+  "Program": "OmniSight",
+  "Version": "2.4.2",
+  "Tag": "v2.4.2",
+  "Commit": "8b1d77e",
+  "ReleasedAt": "2026-10-16T18:00:00",
+  "PackagePath": "\\\\NAS\\Releases\\OmniSight\\v2.4.2",
+  "Notes": "- 카메라 연결이 끊기면 5초 간격으로 계속 재연결 (TS-2026-10-0002)\n- 재연결 중 화면에 '카메라 재연결 중 (n회)' 표시",
+  "WorkItemIds": [ "TS-2026-10-0002" ],
+  "Deployments": [
+    { "Customer": "B사", "Site": "청주 1공장", "Equipment": "롤프레스 1호기", "DeployedAt": "2026-10-17T13:30:00", "WorkItemId": "TS-2026-10-0002", "Note": "재가동 3회 자동 복구 확인", "RolledBack": false }
+  ]
+}

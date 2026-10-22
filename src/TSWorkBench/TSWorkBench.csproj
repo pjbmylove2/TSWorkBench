@@ -40,6 +40,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
@@ -61,6 +63,37 @@
     <Compile Include="Storage\WorkRepository.cs" />
     <Compile Include="Storage\Workspace.cs" />
     <Compile Include="Storage\LocationStore.cs" />
+    <Compile Include="Storage\ErrorLog.cs" />
+    <Compile Include="Storage\BackupService.cs" />
+    <Compile Include="Services\SimilarCases.cs" />
+    <Compile Include="Services\ReleasePackager.cs" />
+    <Compile Include="Models\ReleaseRecord.cs" />
+    <Compile Include="Storage\ReleaseRepository.cs" />
+    <Compile Include="Forms\SimilarCasesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SimilarCasesForm.Designer.cs">
+      <DependentUpon>SimilarCasesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ReleaseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ReleaseDialog.Designer.cs">
+      <DependentUpon>ReleaseDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\DeployDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\DeployDialog.Designer.cs">
+      <DependentUpon>DeployDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\ReleasesPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Pages\ReleasesPage.Designer.cs">
+      <DependentUpon>ReleasesPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Theme\FontManager.cs" />
     <Compile Include="Services\WorkflowRules.cs" />
     <Compile Include="Services\StatsService.cs" />
     <Compile Include="Services\WorkQuery.cs" />
@@ -153,6 +186,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\NanumGothic.ttf" />
     <None Include="App.config" />
     <None Include="app.manifest" />
     <Content Include="Templates\field-report.html">

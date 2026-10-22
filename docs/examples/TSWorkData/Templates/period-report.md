@@ -17,5 +17,8 @@
 ## 다음 기간 예정 ({{NextPeriod}})
 {{PlannedList}}
 
+## 배포 (기간 내 설비 설치)
+{{Deployments}}
+
 ## 반복 이슈 (기간 내 접수·완료 기준)
 {{TopIssues}}

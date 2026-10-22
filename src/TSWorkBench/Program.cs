@@ -4,6 +4,7 @@ using System.Threading;
 using System.Windows.Forms;
 using TSWorkBench.Forms;
 using TSWorkBench.Storage;
+using TSWorkBench.Theme;
 
 namespace TSWorkBench
 {
@@ -22,7 +23,20 @@ namespace TSWorkBench
             Application.SetCompatibleTextRenderingDefault(false);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             Application.ThreadException += OnThreadException;
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => ErrorLog.Write("처리되지 않은 예외", e.ExceptionObject as Exception);
+            FontManager.Initialize();
+            try
+            {
+                Run(args);
+            }
+            finally
+            {
+                FontManager.Release();
+            }
+        }
 
+        private static void Run(string[] args)
+        {
             var argFolder = ArgValue(args, "--data");
             var folder = argFolder ?? LocationStore.Load();
             while (true)
@@ -86,6 +100,7 @@ namespace TSWorkBench
 
         private static void OnThreadException(object sender, ThreadExceptionEventArgs e)
         {
+            ErrorLog.Write("화면 처리 중 예외", e.Exception);
             MessageBox.Show("예상하지 못한 오류가 났습니다. 입력 중인 내용은 저장 후 다시 시도하세요.\n\n" + e.Exception.Message,
                 "TS WorkBench", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }

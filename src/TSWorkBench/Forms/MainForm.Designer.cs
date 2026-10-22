@@ -31,6 +31,7 @@ namespace TSWorkBench.Forms
             this.pnlNav = new System.Windows.Forms.Panel();
             this.navSettings = new TSWorkBench.Theme.NavButton();
             this.navImport = new TSWorkBench.Theme.NavButton();
+            this.navReleases = new TSWorkBench.Theme.NavButton();
             this.navReports = new TSWorkBench.Theme.NavButton();
             this.navKnowledge = new TSWorkBench.Theme.NavButton();
             this.navPlanned = new TSWorkBench.Theme.NavButton();
@@ -56,6 +57,7 @@ namespace TSWorkBench.Forms
             this.pnlNav.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(47)))), ((int)(((byte)(47)))), ((int)(((byte)(47)))));
             this.pnlNav.Controls.Add(this.navSettings);
             this.pnlNav.Controls.Add(this.navImport);
+            this.pnlNav.Controls.Add(this.navReleases);
             this.pnlNav.Controls.Add(this.navReports);
             this.pnlNav.Controls.Add(this.navKnowledge);
             this.pnlNav.Controls.Add(this.navPlanned);
@@ -96,6 +98,14 @@ namespace TSWorkBench.Forms
             this.navReports.Size = new System.Drawing.Size(210, 46);
             this.navReports.TabIndex = 5;
             this.navReports.Text = "보고서 · 업무대장";
+            //
+            // navReleases
+            //
+            this.navReleases.Dock = System.Windows.Forms.DockStyle.Top;
+            this.navReleases.Name = "navReleases";
+            this.navReleases.Size = new System.Drawing.Size(210, 46);
+            this.navReleases.TabIndex = 6;
+            this.navReleases.Text = "배포 이력 (버전·설비)";
             //
             // navKnowledge
             //
@@ -247,13 +257,13 @@ namespace TSWorkBench.Forms
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(1384, 861);
+            this.ClientSize = new System.Drawing.Size(1440, 900);
             this.Controls.Add(this.pnlContent);
             this.Controls.Add(this.pnlHeader);
             this.Controls.Add(this.pnlNav);
             this.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
             this.KeyPreview = true;
-            this.MinimumSize = new System.Drawing.Size(1100, 700);
+            this.MinimumSize = new System.Drawing.Size(1400, 860);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TS WorkBench";
@@ -274,6 +284,7 @@ namespace TSWorkBench.Forms
         private TSWorkBench.Theme.NavButton navKnowledge;
         private TSWorkBench.Theme.NavButton navReports;
         private TSWorkBench.Theme.NavButton navImport;
+        private TSWorkBench.Theme.NavButton navReleases;
         private TSWorkBench.Theme.NavButton navSettings;
         private System.Windows.Forms.Panel pnlNavBottom;
         private TSWorkBench.Theme.DarkButton btnQuickAdd;

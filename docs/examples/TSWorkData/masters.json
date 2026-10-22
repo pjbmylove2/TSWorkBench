@@ -44,6 +44,9 @@
       "Keywords": ""
     }
   ],
+  "Programs": [
+    { "Name": "OmniSight", "Keywords": "옴니사이트" }
+  ],
   "Checklists": {
     "FieldVisit": [
       "출동 전: 고객 담당자·출입 절차 확인",

@@ -32,6 +32,7 @@ namespace TSWorkBench.Checks
                 TemplateChecks();
                 ImportChecks();
                 ReportChecks(root);
+                FeatureChecks(root + "_features");
             }
             catch (Exception ex)
             {
@@ -199,6 +200,149 @@ namespace TSWorkBench.Checks
             var xlsx = Path.Combine(ws.ReportsDir, "대장.xlsx");
             ExcelExporter.Export(xlsx, ws.Items.All.ToList(), stats, "통계");
             Check("엑셀 생성", File.Exists(xlsx) && new FileInfo(xlsx).Length > 1000);
+        }
+
+        /// <summary>자동 백업, 업무 복제, 유사 사례, 배포 패키지·설치 기록.</summary>
+        private static void FeatureChecks(string root)
+        {
+            try
+            {
+                var now = new DateTime(2026, 10, 22, 10, 0, 0);
+                var ws = Workspace.Open(Path.Combine(root, "data"), Templates);
+                ws.Settings.BackupFolder = Path.Combine(root, "backup");
+                ws.Settings.BackupKeepCount = 2;
+
+                var a = ws.NewItem(WorkType.HardwareFix, now.AddDays(-5));
+                a.Title = "2라인 OCR 오판정 증가";
+                a.Equipment = "노칭 2호기";
+                a.TargetSystem = "OCR 검사";
+                a.Tags = "조명, 오판정";
+                a.Cause = "조명 열화";
+                a.Status = WorkStatus.Done;
+                ws.Save(a);
+                var other = ws.NewItem(WorkType.Inquiry, now.AddDays(-3));
+                other.Title = "검사 이미지 보관 기간 문의";
+                other.Equipment = "롤프레스 1호기";
+                ws.Save(other);
+
+                // 자동 백업
+                var first = BackupService.RunDaily(ws, now);
+                Check("백업 zip 생성", first != null && File.Exists(first));
+                Check("같은 날 두 번째는 건너뜀", BackupService.RunDaily(ws, now.AddHours(3)) == null);
+                using (var zip = System.IO.Compression.ZipFile.OpenRead(first))
+                {
+                    Check("백업에 item.json 포함", zip.Entries.Count(e => e.Name == "item.json") == 2 && zip.Entries.Any(e => e.FullName == "settings.json"));
+                }
+
+                BackupService.RunDaily(ws, now.AddDays(1));
+                BackupService.RunDaily(ws, now.AddDays(2));
+                Check("보관 개수만 남김", Directory.GetFiles(ws.Settings.BackupFolder, "*.zip").Length == 2);
+
+                // 업무 ID 다시 부여 (접수 일시를 6월로 잘못 넣고 저장 → 5월로 고침)
+                Check("IdMonth 새·예전 형식", WorkRepository.IdMonth("TS-2026-06-0003") == "2026-06" && WorkRepository.IdMonth("TS-2026-0001") == "2026");
+                var june = ws.NewItem(WorkType.ProgramChange, new DateTime(2026, 6, 10, 9, 0, 0));
+                june.Title = "접수일 잘못 넣은 업무";
+                ws.Save(june);
+                var juneId = june.Id;
+                var juneFile = Path.Combine(ws.Items.FolderOf(june), "files", "사진.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(juneFile));
+                File.WriteAllText(juneFile, "png");
+                var follow = ws.NewItem(WorkType.FollowUp, now);
+                follow.Title = "후속";
+                follow.ParentId = juneId;
+                ws.Save(follow);
+                var linked = new ReleaseRecord { Program = "Tool", Version = "1.0.0", ReleasedAt = now, WorkItemIds = { juneId } };
+                linked.Deployments.Add(new Deployment { Equipment = "설비", DeployedAt = now, WorkItemId = juneId });
+                ws.Releases.Save(linked);
+
+                june.ReceivedAt = new DateTime(2026, 5, 28, 14, 0, 0);
+                Check("접수 월이 바뀌면 불일치 감지", juneId == "TS-2026-06-0001" && !WorkRepository.IdMatchesReceived(june), juneId);
+                var mayId = ws.ReassignId(june, now);
+                Check("새 ID는 5월 번호", mayId == "TS-2026-05-0001" && june.Id == mayId && WorkRepository.IdMatchesReceived(june), mayId);
+                Check("폴더·첨부 이동", !Directory.Exists(Path.Combine(ws.Root, "Items", "2026", juneId))
+                                       && File.Exists(Path.Combine(ws.Items.FolderOf(june), "files", "사진.png")));
+                var re = Workspace.Open(Path.Combine(root, "data"), Templates);
+                Check("다시 열어도 새 ID·연결 갱신", re.Items.Find(mayId) != null && re.Items.Find(juneId) == null
+                                                && re.Items.Find(follow.Id).ParentId == mayId
+                                                && re.Releases.Find("Tool", "1.0.0").WorkItemIds.Single() == mayId
+                                                && re.Releases.Find("Tool", "1.0.0").Deployments.Single().WorkItemId == mayId);
+                Check("ID 변경이 작업 이력에", re.Items.Find(mayId).Timeline.Any(t => t.Text.Contains(juneId + " → " + mayId)));
+                Check("예전 6월 번호는 다시 안 씀", re.Items.NewId("TS", new DateTime(2026, 6, 20)) == "TS-2026-06-0002");
+                ws = re;
+
+                // 업무 복제
+                a.Timeline.Add(new TimelineEntry { Start = now, Kind = TimelineKind.OnSite, Text = "x" });
+                a.Checklist[0].Done = true;
+                var copy = ws.Duplicate(a, now);
+                Check("복제: ID 없음·어디/무엇 복사", copy.Id == "" && copy.Equipment == a.Equipment && copy.Title == a.Title);
+                Check("복제: 원인 비움·체크 해제", copy.Cause == "" && copy.Checklist.All(c => !c.Done) && copy.Checklist.Count == a.Checklist.Count);
+
+                // 유사 사례
+                var probe = new WorkItem { Title = "OCR 오판정", Equipment = "노칭 2호기", Tags = "조명" };
+                var similar = SimilarCases.Find(probe, ws.Items.All);
+                Check("유사 사례: 같은 설비·태그 사례만", similar.Count == 1 && similar[0].Id == a.Id, string.Join(",", similar.Select(s => s.Id)));
+
+                // 배포 패키지
+                var build = Path.Combine(root, "bin");
+                Directory.CreateDirectory(Path.Combine(build, "sub"));
+                File.WriteAllText(Path.Combine(build, "App.exe"), "exe");
+                File.WriteAllText(Path.Combine(build, "App.pdb"), "pdb");
+                File.WriteAllText(Path.Combine(build, "sub", "a.dll"), "dll");
+                var manual = Path.Combine(root, "manual");
+                Directory.CreateDirectory(Path.Combine(manual, "images"));
+                File.WriteAllText(Path.Combine(manual, "사용설명서.md"), "# 설명");
+                File.WriteAllText(Path.Combine(manual, "images", "1.png"), "png");
+                var store = Path.Combine(root, "Releases");
+                var request = new PackageRequest { Program = "OmniSight", Version = "2.4.2", BuildFolder = build, ManualFolder = manual, Notes = "- 재연결 수정" };
+                var release = ReleasePackager.Create(store, request, now);
+                var folder = Path.Combine(store, "OmniSight", "v2.4.2");
+                Check("패키지 폴더 구성", release.PackagePath == folder
+                                       && File.Exists(Path.Combine(folder, "OmniSight_v2.4.2.zip"))
+                                       && File.Exists(Path.Combine(folder, "manual", "images", "1.png"))
+                                       && File.ReadAllText(Path.Combine(folder, "RELEASE_NOTES.md")).Contains("- 재연결 수정"));
+                using (var zip = System.IO.Compression.ZipFile.OpenRead(Path.Combine(folder, "OmniSight_v2.4.2.zip")))
+                {
+                    Check("zip: pdb 제외·하위 폴더 포함", zip.Entries.Count == 2 && zip.Entries.Any(e => e.FullName.Replace('\\', '/') == "sub/a.dll"));
+                }
+
+                var sums = File.ReadAllText(Path.Combine(folder, "SHA256SUMS.txt"));
+                Check("SHA256SUMS 다시 계산과 같음", sums == ReleasePackager.Checksums(folder) && sums.Contains("  manual/사용설명서.md"));
+                var refused = false;
+                try
+                {
+                    ReleasePackager.Create(store, request, now);
+                }
+                catch (InvalidOperationException)
+                {
+                    refused = true;
+                }
+
+                Check("같은 버전 다시 만들기 거부", refused && File.Exists(Path.Combine(folder, "SHA256SUMS.txt")));
+
+                // 설치 기록·설비별 현재 버전
+                release.Deployments.Add(new Deployment { Customer = "A사", Equipment = "노칭 2호기", DeployedAt = now, WorkItemId = a.Id });
+                ws.Releases.Save(release);
+                var v243 = new ReleaseRecord { Program = "OmniSight", Version = "2.4.3", ReleasedAt = now.AddDays(1) };
+                v243.Deployments.Add(new Deployment { Customer = "A사", Equipment = "노칭 2호기", DeployedAt = now.AddDays(1), RolledBack = true });
+                v243.Deployments.Add(new Deployment { Customer = "B사", Equipment = "롤프레스 1호기", DeployedAt = now.AddDays(1) });
+                ws.Releases.Save(v243);
+                var reopened = Workspace.Open(Path.Combine(root, "data"), Templates);
+                Check("배포 기록 저장→로드", reopened.Releases.All.Count(r => r.Program == "OmniSight") == 2 && reopened.Releases.Find("omnisight", "2.4.2").Deployments.Count == 1);
+                var current = ReleaseRepository.CurrentVersions(reopened.Releases.All).Where(c => c.Program == "OmniSight").ToList();
+                Check("설비별 현재 버전 (되돌림 제외)", current.Count == 2
+                                                 && current.Single(c => c.Equipment == "노칭 2호기").Version == "2.4.2"
+                                                 && current.Single(c => c.Equipment == "롤프레스 1호기").Version == "2.4.3");
+
+                var md = new ReportGenerator(reopened).PeriodMarkdown("주간 업무 보고", new DateTime(2026, 10, 19), new DateTime(2026, 10, 26), now);
+                Check("주간 보고에 배포 표", md.Contains("| OmniSight | 2.4.2 |") && md.Contains("2.4.3 (되돌림)"), md);
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
         }
 
         /// <summary>docs\examples의 예제 데이터 폴더가 오류 없이 읽히는지 보고, 샘플 보고서를 그 폴더에 만든다.</summary>

@@ -29,7 +29,6 @@ namespace TSWorkBench.Theme
         public static readonly Color Warning = Color.FromArgb(241, 196, 15);
         public static readonly Color Info = Color.FromArgb(52, 152, 219);
 
-        public const string FontName = "맑은 고딕";
 
         public static Color StatusColor(WorkStatus status)
         {

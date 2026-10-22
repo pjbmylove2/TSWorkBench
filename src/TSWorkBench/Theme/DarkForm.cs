@@ -21,6 +21,7 @@ namespace TSWorkBench.Theme
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            FontManager.Apply(this);
             DarkTheme.DarkScrollBarsAll(this);
         }
     }

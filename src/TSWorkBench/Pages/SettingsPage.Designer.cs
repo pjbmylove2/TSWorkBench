@@ -30,6 +30,15 @@ namespace TSWorkBench.Pages
         {
             this.pnlGeneral = new System.Windows.Forms.Panel();
             this.lblTemplatesHint = new System.Windows.Forms.Label();
+            this.lblReleaseStore = new System.Windows.Forms.Label();
+            this.txtReleaseStore = new System.Windows.Forms.TextBox();
+            this.btnReleaseStore = new TSWorkBench.Theme.DarkButton();
+            this.lblBackupFolder = new System.Windows.Forms.Label();
+            this.txtBackupFolder = new System.Windows.Forms.TextBox();
+            this.btnBackupFolder = new TSWorkBench.Theme.DarkButton();
+            this.lblBackupKeep = new System.Windows.Forms.Label();
+            this.numBackupKeep = new System.Windows.Forms.NumericUpDown();
+            this.btnBackupNow = new TSWorkBench.Theme.DarkButton();
             this.btnOpenTemplates = new TSWorkBench.Theme.DarkButton();
             this.btnSaveSettings = new TSWorkBench.Theme.DarkButton();
             this.numFollowUp = new System.Windows.Forms.NumericUpDown();
@@ -64,6 +73,7 @@ namespace TSWorkBench.Pages
             this.btnSaveChecklist = new TSWorkBench.Theme.DarkButton();
             this.pnlGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numFollowUp)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numBackupKeep)).BeginInit();
             this.tblRight.SuspendLayout();
             this.pnlMasters.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridMasters)).BeginInit();
@@ -76,6 +86,15 @@ namespace TSWorkBench.Pages
             //
             this.pnlGeneral.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(47)))), ((int)(((byte)(47)))), ((int)(((byte)(47)))));
             this.pnlGeneral.Controls.Add(this.lblTemplatesHint);
+            this.pnlGeneral.Controls.Add(this.lblReleaseStore);
+            this.pnlGeneral.Controls.Add(this.txtReleaseStore);
+            this.pnlGeneral.Controls.Add(this.btnReleaseStore);
+            this.pnlGeneral.Controls.Add(this.lblBackupFolder);
+            this.pnlGeneral.Controls.Add(this.txtBackupFolder);
+            this.pnlGeneral.Controls.Add(this.btnBackupFolder);
+            this.pnlGeneral.Controls.Add(this.lblBackupKeep);
+            this.pnlGeneral.Controls.Add(this.numBackupKeep);
+            this.pnlGeneral.Controls.Add(this.btnBackupNow);
             this.pnlGeneral.Controls.Add(this.btnOpenTemplates);
             this.pnlGeneral.Controls.Add(this.btnSaveSettings);
             this.pnlGeneral.Controls.Add(this.numFollowUp);
@@ -93,6 +112,7 @@ namespace TSWorkBench.Pages
             this.pnlGeneral.Controls.Add(this.txtDataFolder);
             this.pnlGeneral.Controls.Add(this.lblDataFolder);
             this.pnlGeneral.Controls.Add(this.lblSecGeneral);
+            this.pnlGeneral.AutoScroll = true;
             this.pnlGeneral.Dock = System.Windows.Forms.DockStyle.Left;
             this.pnlGeneral.Location = new System.Drawing.Point(0, 0);
             this.pnlGeneral.Name = "pnlGeneral";
@@ -240,10 +260,96 @@ namespace TSWorkBench.Pages
             this.numFollowUp.Size = new System.Drawing.Size(80, 25);
             this.numFollowUp.TabIndex = 7;
             //
+            // lblReleaseStore
+            //
+            this.lblReleaseStore.AutoSize = true;
+            this.lblReleaseStore.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            this.lblReleaseStore.Location = new System.Drawing.Point(18, 452);
+            this.lblReleaseStore.Name = "lblReleaseStore";
+            this.lblReleaseStore.Text = "배포본 보관소 (공유 폴더, 예: \\\\NAS\\Releases)";
+            //
+            // txtReleaseStore
+            //
+            this.txtReleaseStore.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(56)))), ((int)(((byte)(58)))));
+            this.txtReleaseStore.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtReleaseStore.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+            this.txtReleaseStore.Location = new System.Drawing.Point(18, 474);
+            this.txtReleaseStore.Name = "txtReleaseStore";
+            this.txtReleaseStore.Size = new System.Drawing.Size(256, 25);
+            this.txtReleaseStore.TabIndex = 8;
+            //
+            // btnReleaseStore
+            //
+            this.btnReleaseStore.Location = new System.Drawing.Point(282, 472);
+            this.btnReleaseStore.Name = "btnReleaseStore";
+            this.btnReleaseStore.Size = new System.Drawing.Size(88, 29);
+            this.btnReleaseStore.TabIndex = 9;
+            this.btnReleaseStore.Text = "찾아보기";
+            this.btnReleaseStore.Click += new System.EventHandler(this.btnReleaseStore_Click);
+            //
+            // lblBackupFolder
+            //
+            this.lblBackupFolder.AutoSize = true;
+            this.lblBackupFolder.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            this.lblBackupFolder.Location = new System.Drawing.Point(18, 512);
+            this.lblBackupFolder.Name = "lblBackupFolder";
+            this.lblBackupFolder.Text = "자동 백업 폴더 (비우면 데이터 폴더\\Backups)";
+            //
+            // txtBackupFolder
+            //
+            this.txtBackupFolder.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(56)))), ((int)(((byte)(58)))));
+            this.txtBackupFolder.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtBackupFolder.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+            this.txtBackupFolder.Location = new System.Drawing.Point(18, 534);
+            this.txtBackupFolder.Name = "txtBackupFolder";
+            this.txtBackupFolder.Size = new System.Drawing.Size(256, 25);
+            this.txtBackupFolder.TabIndex = 10;
+            //
+            // btnBackupFolder
+            //
+            this.btnBackupFolder.Location = new System.Drawing.Point(282, 532);
+            this.btnBackupFolder.Name = "btnBackupFolder";
+            this.btnBackupFolder.Size = new System.Drawing.Size(88, 29);
+            this.btnBackupFolder.TabIndex = 11;
+            this.btnBackupFolder.Text = "찾아보기";
+            this.btnBackupFolder.Click += new System.EventHandler(this.btnBackupFolder_Click);
+            //
+            // lblBackupKeep
+            //
+            this.lblBackupKeep.AutoSize = true;
+            this.lblBackupKeep.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            this.lblBackupKeep.Location = new System.Drawing.Point(18, 572);
+            this.lblBackupKeep.Name = "lblBackupKeep";
+            this.lblBackupKeep.Text = "백업 보관 개수 (하루 1개, 0 = 지우지 않음)";
+            //
+            // numBackupKeep
+            //
+            this.numBackupKeep.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(56)))), ((int)(((byte)(56)))), ((int)(((byte)(58)))));
+            this.numBackupKeep.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.numBackupKeep.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+            this.numBackupKeep.Location = new System.Drawing.Point(18, 594);
+            this.numBackupKeep.Maximum = new decimal(new int[] {
+            3650,
+            0,
+            0,
+            0});
+            this.numBackupKeep.Name = "numBackupKeep";
+            this.numBackupKeep.Size = new System.Drawing.Size(80, 25);
+            this.numBackupKeep.TabIndex = 12;
+            //
+            // btnBackupNow
+            //
+            this.btnBackupNow.Location = new System.Drawing.Point(110, 592);
+            this.btnBackupNow.Name = "btnBackupNow";
+            this.btnBackupNow.Size = new System.Drawing.Size(120, 29);
+            this.btnBackupNow.TabIndex = 13;
+            this.btnBackupNow.Text = "지금 백업";
+            this.btnBackupNow.Click += new System.EventHandler(this.btnBackupNow_Click);
+            //
             // btnSaveSettings
             //
             this.btnSaveSettings.Accent = true;
-            this.btnSaveSettings.Location = new System.Drawing.Point(18, 460);
+            this.btnSaveSettings.Location = new System.Drawing.Point(18, 636);
             this.btnSaveSettings.Name = "btnSaveSettings";
             this.btnSaveSettings.Size = new System.Drawing.Size(120, 36);
             this.btnSaveSettings.TabIndex = 8;
@@ -252,7 +358,7 @@ namespace TSWorkBench.Pages
             //
             // btnOpenTemplates
             //
-            this.btnOpenTemplates.Location = new System.Drawing.Point(18, 530);
+            this.btnOpenTemplates.Location = new System.Drawing.Point(18, 696);
             this.btnOpenTemplates.Name = "btnOpenTemplates";
             this.btnOpenTemplates.Size = new System.Drawing.Size(200, 32);
             this.btnOpenTemplates.TabIndex = 9;
@@ -262,7 +368,7 @@ namespace TSWorkBench.Pages
             // lblTemplatesHint
             //
             this.lblTemplatesHint.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
-            this.lblTemplatesHint.Location = new System.Drawing.Point(18, 568);
+            this.lblTemplatesHint.Location = new System.Drawing.Point(18, 734);
             this.lblTemplatesHint.Name = "lblTemplatesHint";
             this.lblTemplatesHint.Size = new System.Drawing.Size(352, 64);
             this.lblTemplatesHint.Text = "메모장으로 html·md 파일을 고치면 회사·고객 양식에 맞출 수 있습니다. 파일을 지우면 다음 실행 때 기본 템플릿이 다시 생깁니다.";
@@ -347,7 +453,8 @@ namespace TSWorkBench.Pages
             "고객사",
             "사이트 / 라인",
             "설비",
-            "대상 시스템"});
+            "대상 시스템",
+            "프로그램 (배포용)"});
             this.cboMasterKind.Location = new System.Drawing.Point(0, 50);
             this.cboMasterKind.Name = "cboMasterKind";
             this.cboMasterKind.Size = new System.Drawing.Size(180, 25);
@@ -438,6 +545,7 @@ namespace TSWorkBench.Pages
             this.pnlGeneral.ResumeLayout(false);
             this.pnlGeneral.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numFollowUp)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numBackupKeep)).EndInit();
             this.tblRight.ResumeLayout(false);
             this.pnlMasters.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridMasters)).EndInit();
@@ -472,6 +580,15 @@ namespace TSWorkBench.Pages
         private TSWorkBench.Theme.DarkButton btnSaveSettings;
         private TSWorkBench.Theme.DarkButton btnOpenTemplates;
         private System.Windows.Forms.Label lblTemplatesHint;
+        private System.Windows.Forms.Label lblReleaseStore;
+        private System.Windows.Forms.TextBox txtReleaseStore;
+        private TSWorkBench.Theme.DarkButton btnReleaseStore;
+        private System.Windows.Forms.Label lblBackupFolder;
+        private System.Windows.Forms.TextBox txtBackupFolder;
+        private TSWorkBench.Theme.DarkButton btnBackupFolder;
+        private System.Windows.Forms.Label lblBackupKeep;
+        private System.Windows.Forms.NumericUpDown numBackupKeep;
+        private TSWorkBench.Theme.DarkButton btnBackupNow;
         private System.Windows.Forms.TableLayoutPanel tblRight;
         private System.Windows.Forms.Panel pnlMasters;
         private TSWorkBench.Theme.DarkGrid gridMasters;

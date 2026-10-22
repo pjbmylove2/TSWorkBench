@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using TSWorkBench.Models;
 
 namespace TSWorkBench.Storage
@@ -13,6 +14,8 @@ namespace TSWorkBench.Storage
     ///   Items\2026\TS-2026-10-0001\item.json, files\
     ///   Templates\      보고서 템플릿 (수정 가능)
     ///   Reports\        생성된 보고서
+    ///   Releases\       배포 기록 (프로그램\버전.json)
+    ///   Backups\        자동 백업 zip (설정에서 다른 폴더 지정 가능)
     ///   Trash\          삭제한 업무
     /// </code>
     /// </summary>
@@ -22,6 +25,7 @@ namespace TSWorkBench.Storage
         {
             Root = root;
             Items = new WorkRepository(Path.Combine(root, "Items"), Path.Combine(root, "Trash"));
+            Releases = new ReleaseRepository(Path.Combine(root, "Releases"));
         }
 
         public string Root { get; }
@@ -30,6 +34,7 @@ namespace TSWorkBench.Storage
         public AppSettings Settings { get; private set; }
         public MasterData Masters { get; private set; }
         public WorkRepository Items { get; }
+        public ReleaseRepository Releases { get; }
 
         private string SettingsPath => Path.Combine(Root, "settings.json");
         private string MastersPath => Path.Combine(Root, "masters.json");
@@ -55,6 +60,7 @@ namespace TSWorkBench.Storage
 
             CopyMissingTemplates(defaultTemplatesDir, ws.TemplatesDir);
             ws.Items.LoadAll();
+            ws.Releases.LoadAll();
             return ws;
         }
 
@@ -73,12 +79,86 @@ namespace TSWorkBench.Storage
             Items.Save(item, Settings.IdPrefix);
         }
 
+        /// <summary>
+        /// 접수 일시의 연·월로 ID를 다시 받는다. 후속 업무의 원본 ID와 배포 기록의 업무 ID도 함께 바꾼다.
+        /// 이미 만든 보고서 파일과 다른 카드 글 속에 적힌 ID 글자는 바꾸지 않는다. 새 ID를 돌려준다.
+        /// </summary>
+        public string ReassignId(WorkItem item, DateTime now)
+        {
+            var oldId = item.Id;
+            var newId = Items.NewId(Settings.IdPrefix, item.ReceivedAt);
+            item.Timeline.Add(new TimelineEntry
+            {
+                Start = now,
+                Kind = TimelineKind.Note,
+                Text = "업무 ID 변경: " + oldId + " → " + newId + " (접수 일시 수정)"
+            });
+            Items.ChangeId(item, newId);
+
+            foreach (var child in Items.All.Where(i => i.ParentId == oldId).ToList())
+            {
+                child.ParentId = newId;
+                Save(child);
+            }
+
+            foreach (var release in Releases.All.ToList())
+            {
+                var changed = false;
+                for (var k = 0; k < release.WorkItemIds.Count; k++)
+                {
+                    if (release.WorkItemIds[k] == oldId)
+                    {
+                        release.WorkItemIds[k] = newId;
+                        changed = true;
+                    }
+                }
+
+                foreach (var d in release.Deployments.Where(d => d.WorkItemId == oldId))
+                {
+                    d.WorkItemId = newId;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    Releases.Save(release);
+                }
+            }
+
+            return newId;
+        }
+
         /// <summary>저장 전 새 업무. 유형별 체크리스트를 미리 채운다.</summary>
         public WorkItem NewItem(WorkType type, DateTime now)
         {
             var item = new WorkItem { Type = type, ReceivedAt = now };
             FillChecklist(item);
             item.Timeline.Add(new TimelineEntry { Start = now, Kind = TimelineKind.Contact, Text = "업무 접수" });
+            return item;
+        }
+
+        /// <summary>
+        /// 반복 업무(정기 점검 등)용 복제. 어디·무엇·현상과 체크리스트 항목만 가져오고
+        /// 원인·조치·검증·이력·첨부는 비운다. 저장 전이라 ID는 없다.
+        /// </summary>
+        public WorkItem Duplicate(WorkItem source, DateTime now)
+        {
+            var item = new WorkItem
+            {
+                Title = source.Title,
+                Type = source.Type,
+                Priority = source.Priority,
+                Customer = source.Customer,
+                Site = source.Site,
+                Equipment = source.Equipment,
+                TargetSystem = source.TargetSystem,
+                Tags = source.Tags,
+                Requester = source.Requester,
+                Symptom = source.Symptom,
+                ReceivedAt = now
+            };
+            item.Checklist.AddRange(source.Checklist.Select(c => new ChecklistItem { Text = c.Text }));
+            item.Timeline.Add(new TimelineEntry { Start = now, Kind = TimelineKind.Note, Text = source.Id + " 복제" });
             return item;
         }
 

@@ -56,6 +56,12 @@ namespace TSWorkBench.Forms
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            UpdateSimilarCount();
+            foreach (var input in new Control[] { txtTitle, txtSymptom, cboCustomer, cboEquipment, cboSystem, txtTags })
+            {
+                input.Leave += similarInput_Leave;
+            }
+
             if (IsNew)
             {
                 txtTitle.Focus();
@@ -102,6 +108,7 @@ namespace TSWorkBench.Forms
             loading = true;
             Text = IsNew ? "새 업무 카드" : item.Id + "  " + item.Title;
             lblId.Text = IsNew ? "(저장 시 부여)" : item.Id;
+            btnReassign.Enabled = !IsNew;
             txtTitle.Text = item.Title;
             UiHelpers.FillChoices(cboType, item.Type);
             UiHelpers.FillChoices(cboPriority, item.Priority);
@@ -209,9 +216,19 @@ namespace TSWorkBench.Forms
                 return false;
             }
 
+            var wasNew = IsNew;
+            string oldId = null;
             try
             {
-                ws.Save(item);
+                if (!wasNew && ShouldReassign(false))
+                {
+                    oldId = item.Id;
+                    ws.ReassignId(item, DateTime.Now);
+                }
+                else
+                {
+                    ws.Save(item);
+                }
             }
             catch (Exception ex)
             {
@@ -219,10 +236,120 @@ namespace TSWorkBench.Forms
                 return false;
             }
 
+            AfterSave();
+            if (wasNew)
+            {
+                MessageBox.Show(this, "저장했습니다.\n업무 ID: " + item.Id, "저장", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else if (oldId != null)
+            {
+                ShowReassigned(oldId);
+            }
+            else
+            {
+                ShowSavedMark();
+            }
+
+            return true;
+        }
+
+        private void AfterSave()
+        {
             savedSnapshot = JsonFile.Serialize(item);
             Text = item.Id + "  " + item.Title;
             lblId.Text = item.Id;
-            return true;
+            btnReassign.Enabled = true;
+        }
+
+        // ── 업무 ID 다시 부여 ─────────────────────────────────
+
+        /// <summary>이 창에서 "아니요"라고 답한 접수 연·월. 같은 달로는 다시 묻지 않는다.</summary>
+        private string declinedMonth;
+
+        /// <summary>접수 연·월이 ID와 다르면 바꿀지 묻는다. manual이면 전에 거절했어도 다시 묻는다.</summary>
+        private bool ShouldReassign(bool manual)
+        {
+            if (WorkRepository.IdMatchesReceived(item))
+            {
+                return false;
+            }
+
+            var month = item.ReceivedAt.ToString("yyyy-MM");
+            if (!manual && month == declinedMonth)
+            {
+                return false;
+            }
+
+            var newId = ws.Items.NewId(ws.Settings.IdPrefix, item.ReceivedAt);
+            var answer = MessageBox.Show(this,
+                "접수 일시가 " + month + "로 바뀌어 업무 ID의 연·월과 다릅니다.\n\n"
+                + item.Id + "  →  " + newId + "\n\n업무 ID를 바꿀까요?\n"
+                + "· 함께 바뀜: 업무 폴더(첨부 포함), 후속 업무의 원본 ID, 배포 기록의 업무 ID\n"
+                + "· 그대로: 이미 만든 보고서 파일, 다른 카드 글 속에 적어 둔 ID",
+                "업무 ID 다시 부여", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (answer == DialogResult.Yes)
+            {
+                return true;
+            }
+
+            declinedMonth = month;
+            return false;
+        }
+
+        private void ShowReassigned(string oldId)
+        {
+            MessageBox.Show(this, "업무 ID를 바꿨습니다.\n\n" + oldId + "  →  " + item.Id, "업무 ID 다시 부여",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btnReassign_Click(object sender, EventArgs e)
+        {
+            if (IsNew)
+            {
+                return;
+            }
+
+            ApplyToItem();
+            if (WorkRepository.IdMatchesReceived(item))
+            {
+                MessageBox.Show(this, "접수 일시의 연·월(" + item.ReceivedAt.ToString("yyyy-MM") + ")과 업무 ID가 이미 같습니다.",
+                    "업무 ID 다시 부여", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (!ShouldReassign(true))
+            {
+                return;
+            }
+
+            var oldId = item.Id;
+            try
+            {
+                ws.ReassignId(item, DateTime.Now);
+            }
+            catch (Exception ex)
+            {
+                ItemActions.ShowError(this, "업무 ID 변경", ex);
+                return;
+            }
+
+            AfterSave();
+            FillTimeline();
+            ShowReassigned(oldId);
+        }
+
+        /// <summary>두 번째 저장부터는 창 대신 아래 줄에 잠깐 표시한다.</summary>
+        private void ShowSavedMark()
+        {
+            lblSaved.Text = "✔ 저장됨 " + DateTime.Now.ToString("HH:mm:ss");
+            savedTimer.Stop();
+            savedTimer.Start();
+        }
+
+        private void savedTimer_Tick(object sender, EventArgs e)
+        {
+            savedTimer.Stop();
+            lblSaved.Text = "";
         }
 
         /// <summary>폴더가 필요한 작업(첨부·보고서) 전에 새 카드면 먼저 저장한다.</summary>
@@ -372,6 +499,77 @@ namespace TSWorkBench.Forms
         private void btnClose_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        // ── 유사 사례 · 배포 기록 ──────────────────────────────
+
+        /// <summary>화면에 입력 중인 값으로 비교 대상을 만든다 (저장하지 않은 내용도 반영).</summary>
+        private WorkItem SimilarityProbe()
+        {
+            return new WorkItem
+            {
+                Id = item.Id,
+                Title = txtTitle.Text,
+                Symptom = txtSymptom.Text,
+                Customer = cboCustomer.Text,
+                Equipment = cboEquipment.Text,
+                TargetSystem = cboSystem.Text,
+                Tags = txtTags.Text
+            };
+        }
+
+        private void UpdateSimilarCount()
+        {
+            var count = SimilarCases.Find(SimilarityProbe(), ws.Items.All).Count;
+            btnSimilar.Text = count > 0 ? "유사 사례 (" + count + ")" : "유사 사례";
+            btnSimilar.Accent = count > 0 && IsNew;
+        }
+
+        private void similarInput_Leave(object sender, EventArgs e)
+        {
+            UpdateSimilarCount();
+        }
+
+        private void btnSimilar_Click(object sender, EventArgs e)
+        {
+            using (var form = new SimilarCasesForm(SimilarCases.Find(SimilarityProbe(), ws.Items.All)))
+            {
+                if (form.ShowDialog(this) != DialogResult.OK || form.SelectedCase == null)
+                {
+                    return;
+                }
+
+                var c = form.SelectedCase;
+                var line = "참고 사례: " + c.Id + " " + c.Title + (string.IsNullOrWhiteSpace(c.Cause) ? "" : " — 원인: " + ReportGenerator.FirstLine(c.Cause));
+                txtCauseEvidence.Text = string.IsNullOrWhiteSpace(txtCauseEvidence.Text) ? line : txtCauseEvidence.Text.TrimEnd() + "\r\n" + line;
+                secCause.Checked = true;
+            }
+        }
+
+        private void btnDeploy_Click(object sender, EventArgs e)
+        {
+            if (!EnsureSaved())
+            {
+                return;
+            }
+
+            using (var dialog = new DeployDialog(ws, null, item))
+            {
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                var r = dialog.Release;
+                var d = dialog.Saved;
+                var line = "배포: " + r.Key + " → " + d.Equipment + " (" + ReportGenerator.Minute(d.DeployedAt) + ")"
+                           + (r.PackagePath.Length > 0 ? "  배포본 " + r.PackagePath : "");
+                txtChangedFiles.Text = string.IsNullOrWhiteSpace(txtChangedFiles.Text) ? line : txtChangedFiles.Text.TrimEnd() + "\r\n" + line;
+                item.Timeline.Add(new TimelineEntry { Start = d.DeployedAt, Kind = TimelineKind.OnSite, Text = r.Key + " 설치" });
+                FillTimeline();
+                secAction.Checked = true;
+                TrySave();
+            }
         }
 
         // ── 작업 이력 ────────────────────────────────────────

@@ -21,6 +21,22 @@ namespace TSWorkBench.Theme
             ItemHeight = 19;
         }
 
+        /// <summary>입력형 콤보는 글꼴이 바뀌면 글자 전체가 선택된 채로 남는다. 포커스가 없으면 선택을 푼다.</summary>
+        protected override void OnFontChanged(EventArgs e)
+        {
+            base.OnFontChanged(e);
+            if (DropDownStyle != ComboBoxStyle.DropDownList && IsHandleCreated && !Focused)
+            {
+                BeginInvoke(new Action(() =>
+                {
+                    if (!IsDisposed && !Focused)
+                    {
+                        SelectionLength = 0;
+                    }
+                }));
+            }
+        }
+
         protected override void OnDrawItem(DrawItemEventArgs e)
         {
             var selected = (e.State & DrawItemState.Selected) != 0 && (e.State & DrawItemState.ComboBoxEdit) == 0;

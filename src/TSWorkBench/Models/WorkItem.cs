@@ -51,6 +51,9 @@ namespace TSWorkBench.Models
         public string ParentId { get; set; } = "";
         public string ImportedFrom { get; set; } = "";
 
+        /// <summary>접수 일시를 고쳐 ID를 다시 받았을 때의 예전 ID. 그 번호는 다시 쓰지 않는다.</summary>
+        public List<string> PreviousIds { get; set; } = new List<string>();
+
         public List<TimelineEntry> Timeline { get; set; } = new List<TimelineEntry>();
         public List<ChecklistItem> Checklist { get; set; } = new List<ChecklistItem>();
         public List<AttachmentRef> Attachments { get; set; } = new List<AttachmentRef>();

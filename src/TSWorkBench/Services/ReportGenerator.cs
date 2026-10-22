@@ -164,6 +164,12 @@ namespace TSWorkBench.Services
                     overdue.Select(i => new[] { i.Id, Day(i.DueDate), i.Location, i.Title })) },
                 { "PlannedList", f.Table(new[] { "ID", "기한", "유형", "위치", "제목" },
                     planned.Select(i => new[] { i.Id, Day(i.DueDate), Labels.Of(i.Type), i.Location, i.Title })) },
+                { "Deployments", f.Table(new[] { "설치 일시", "프로그램", "버전", "위치", "업무" },
+                    ws.Releases.All
+                        .SelectMany(r => r.Deployments.Where(d => StatsService.InRange(d.DeployedAt, from, to))
+                            .Select(d => new { r, d }))
+                        .OrderBy(x => x.d.DeployedAt)
+                        .Select(x => new[] { Minute(x.d.DeployedAt), x.r.Program, x.r.Version + (x.d.RolledBack ? " (되돌림)" : ""), x.d.Location, x.d.WorkItemId })) },
                 { "TopIssues", f.Table(new[] { "구분", "상위 항목 (건수)" }, new[]
                     {
                         new[] { "고객사", TopText(stats.ByCustomer) },

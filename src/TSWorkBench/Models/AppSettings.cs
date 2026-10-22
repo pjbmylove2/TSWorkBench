@@ -12,5 +12,14 @@ namespace TSWorkBench.Models
 
         /// <summary>현장·HW·프로그램 수정 업무를 완료하면 이 일수 뒤에 모니터링 후속 업무를 만든다. 0이면 만들지 않는다.</summary>
         public int FollowUpDays { get; set; } = 7;
+
+        /// <summary>자동 백업 폴더. 비우면 데이터 폴더\Backups. 데이터와 다른 디스크(공유 폴더)를 권장.</summary>
+        public string BackupFolder { get; set; } = "";
+
+        /// <summary>남길 백업 zip 개수 (하루 1개). 0이면 지우지 않는다.</summary>
+        public int BackupKeepCount { get; set; } = 30;
+
+        /// <summary>배포본 보관소 (예: \\NAS\Releases). 프로그램\v버전\ 폴더가 여기에 만들어진다.</summary>
+        public string ReleaseStore { get; set; } = "";
     }
 }

@@ -1,0 +1,14 @@
+{
+  "Program": "OmniSight",
+  "Version": "2.4.1",
+  "Tag": "v2.4.1",
+  "Commit": "3f9c2a1",
+  "ReleasedAt": "2026-09-20T15:00:00",
+  "PackagePath": "\\\\NAS\\Releases\\OmniSight\\v2.4.1",
+  "Notes": "- 검사 결과 이미지 저장 경로를 날짜별 폴더로 변경\n- 로그 보관 기간 설정 추가",
+  "WorkItemIds": [],
+  "Deployments": [
+    { "Customer": "A사", "Site": "오창 2공장 2라인", "Equipment": "노칭 2호기", "DeployedAt": "2026-09-25T11:00:00", "WorkItemId": "TS-2026-09-0001", "Note": "정기 점검 때 함께 적용", "RolledBack": false },
+    { "Customer": "B사", "Site": "청주 1공장", "Equipment": "롤프레스 1호기", "DeployedAt": "2026-09-30T14:00:00", "WorkItemId": "", "Note": "", "RolledBack": false }
+  ]
+}

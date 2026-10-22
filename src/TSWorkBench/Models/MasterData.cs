@@ -31,6 +31,7 @@ namespace TSWorkBench.Models
         public List<MasterEntry> Sites { get; set; } = new List<MasterEntry>();
         public List<MasterEntry> Equipments { get; set; } = new List<MasterEntry>();
         public List<MasterEntry> Systems { get; set; } = new List<MasterEntry>();
+        public List<MasterEntry> Programs { get; set; } = new List<MasterEntry>();
         public Dictionary<WorkType, List<string>> Checklists { get; set; } = new Dictionary<WorkType, List<string>>();
 
         public List<string> ChecklistFor(WorkType type)

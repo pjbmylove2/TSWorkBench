@@ -40,12 +40,12 @@ namespace TSWorkBench.Pages
         private void ShowDetail()
         {
             var item = grid.SelectedTag<WorkItem>();
-            if (item == null)
-            {
-                txtDetail.Text = "";
-                return;
-            }
+            txtDetail.Text = item == null ? "" : DetailText(item);
+        }
 
+        /// <summary>현상 → 원인 → 조치 → 검증·재발방지를 읽기 좋은 글로. 유사 사례 창도 같이 쓴다.</summary>
+        public static string DetailText(WorkItem item)
+        {
             var sb = new StringBuilder();
             sb.AppendLine("[" + item.Id + "] " + item.Title);
             sb.AppendLine(Labels.Of(item.Type) + " · " + Labels.Of(item.Status) + " · " + item.Location + (item.TargetSystem.Length > 0 ? " · " + item.TargetSystem : ""));
@@ -59,7 +59,7 @@ namespace TSWorkBench.Pages
                 Section(sb, "■ 첨부", string.Join("\r\n", item.Attachments.Select(a => a.Name)));
             }
 
-            txtDetail.Text = sb.ToString();
+            return sb.ToString();
         }
 
         private static void Section(StringBuilder sb, string title, params string[] parts)

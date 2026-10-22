@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using TSWorkBench.Forms;
 using TSWorkBench.Models;
+using TSWorkBench.Storage;
 
 namespace TSWorkBench.Pages
 {
@@ -41,6 +42,9 @@ namespace TSWorkBench.Pages
             txtCompany.Text = s.Company;
             txtPrefix.Text = s.IdPrefix;
             numFollowUp.Value = Math.Max(numFollowUp.Minimum, Math.Min(numFollowUp.Maximum, s.FollowUpDays));
+            txtReleaseStore.Text = s.ReleaseStore;
+            txtBackupFolder.Text = s.BackupFolder;
+            numBackupKeep.Value = Math.Max(numBackupKeep.Minimum, Math.Min(numBackupKeep.Maximum, s.BackupKeepCount));
 
             shownMasterKind = -1;
             shownChecklistType = null;
@@ -70,7 +74,8 @@ namespace TSWorkBench.Pages
                 case 0: return Ws.Masters.Customers;
                 case 1: return Ws.Masters.Sites;
                 case 2: return Ws.Masters.Equipments;
-                default: return Ws.Masters.Systems;
+                case 3: return Ws.Masters.Systems;
+                default: return Ws.Masters.Programs;
             }
         }
 
@@ -149,6 +154,9 @@ namespace TSWorkBench.Pages
             s.Company = txtCompany.Text.Trim();
             s.IdPrefix = prefix;
             s.FollowUpDays = (int)numFollowUp.Value;
+            s.ReleaseStore = txtReleaseStore.Text.Trim();
+            s.BackupFolder = txtBackupFolder.Text.Trim();
+            s.BackupKeepCount = (int)numBackupKeep.Value;
             SaveAll(Ws.SaveSettings, "기본 정보를 저장했습니다.");
         }
 
@@ -199,6 +207,45 @@ namespace TSWorkBench.Pages
         private void btnOpenData_Click(object sender, EventArgs e)
         {
             ItemActions.OpenPath(Ws.Root);
+        }
+
+        private void btnReleaseStore_Click(object sender, EventArgs e)
+        {
+            PickFolder(txtReleaseStore, "배포본 보관소 (공유 폴더 권장)");
+        }
+
+        private void btnBackupFolder_Click(object sender, EventArgs e)
+        {
+            PickFolder(txtBackupFolder, "자동 백업 폴더 (데이터와 다른 디스크·공유 폴더 권장)");
+        }
+
+        private void PickFolder(TextBox target, string description)
+        {
+            using (var dialog = new FolderBrowserDialog { Description = description, SelectedPath = target.Text, ShowNewFolderButton = true })
+            {
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    target.Text = dialog.SelectedPath;
+                }
+            }
+        }
+
+        private void btnBackupNow_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Cursor = Cursors.WaitCursor;
+                var path = BackupService.RunNow(Ws, DateTime.Now);
+                MessageBox.Show(this, "백업했습니다.\n" + path, "백업", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                ItemActions.ShowError(this, "백업", ex);
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
+            }
         }
 
         private void btnOpenTemplates_Click(object sender, EventArgs e)

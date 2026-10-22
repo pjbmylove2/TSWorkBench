@@ -24,7 +24,9 @@ namespace TSWorkBench.Theme
 
         public static ContextMenuStrip CreateMenu()
         {
-            return new ContextMenuStrip { Renderer = new DarkMenuRenderer(), BackColor = DarkTheme.Panel, ForeColor = DarkTheme.Text };
+            var menu = new ContextMenuStrip { Renderer = new DarkMenuRenderer(), BackColor = DarkTheme.Panel, ForeColor = DarkTheme.Text };
+            FontManager.ApplyToMenu(menu);
+            return menu;
         }
 
         private sealed class DarkColors : ProfessionalColorTable

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using TSWorkBench.Models;
 using TSWorkBench.Pages;
@@ -28,6 +29,7 @@ namespace TSWorkBench.Forms
             AddPage(navPlanned, new WorkListPage { PlannedMode = true });
             AddPage(navKnowledge, new KnowledgePage());
             AddPage(navReports, new ReportsPage());
+            AddPage(navReleases, new ReleasesPage());
             AddPage(navImport, new ImportPage());
             AddPage(navSettings, new SettingsPage());
         }
@@ -45,6 +47,24 @@ namespace TSWorkBench.Forms
             UpdateWorkspaceLabel();
             navDashboard.Checked = true;
             ShowLoadErrors();
+            StartDailyBackup();
+        }
+
+        /// <summary>오늘 백업이 없으면 뒤에서 만든다. 화면은 기다리지 않고, 실패는 오류 로그에만 남긴다.</summary>
+        private void StartDailyBackup()
+        {
+            var ws = workspace;
+            Task.Run(() =>
+            {
+                try
+                {
+                    BackupService.RunDaily(ws, DateTime.Now);
+                }
+                catch (Exception ex)
+                {
+                    ErrorLog.Write("자동 백업 실패", ex);
+                }
+            });
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -93,6 +113,7 @@ namespace TSWorkBench.Forms
             UpdateWorkspaceLabel();
             ShowLoadErrors();
             RefreshCurrentPage();
+            StartDailyBackup();
         }
 
         public void RefreshCurrentPage()
@@ -106,6 +127,7 @@ namespace TSWorkBench.Forms
             var menu = DarkMenuRenderer.CreateMenu();
             Func<WorkItem> selected = () => grid.SelectedTag<WorkItem>();
             menu.Items.Add("열기", null, (s, e) => Run(selected(), OpenItem));
+            menu.Items.Add("복제해서 새 업무 (반복 업무)", null, (s, e) => Run(selected(), i => OpenItem(workspace.Duplicate(i, DateTime.Now))));
             menu.Items.Add("현장 조치 보고서 만들기", null, (s, e) => Run(selected(), i => ItemActions.FieldReport(workspace, i)));
             menu.Items.Add("Notion용 Markdown 복사", null, (s, e) => Run(selected(), i => ItemActions.CopyMarkdown(workspace, i)));
             menu.Items.Add("업무 폴더 열기", null, (s, e) => Run(selected(), i => ItemActions.OpenFolder(workspace, i)));
@@ -204,13 +226,14 @@ namespace TSWorkBench.Forms
 
         private void ShowLoadErrors()
         {
-            if (workspace.Items.LoadErrors.Count == 0)
+            var errors = workspace.Items.LoadErrors.Concat(workspace.Releases.LoadErrors).ToList();
+            if (errors.Count == 0)
             {
                 return;
             }
 
-            MessageBox.Show(this, "읽지 못한 업무 파일이 있습니다. 같은 폴더의 item.json.bak으로 복구할 수 있습니다.\n\n"
-                + string.Join("\n", workspace.Items.LoadErrors.Take(10)), "업무 파일 읽기 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(this, "읽지 못한 파일이 있습니다. 같은 폴더의 .bak 파일(직전 저장본)로 복구할 수 있습니다.\n\n"
+                + string.Join("\n", errors.Take(10)), "파일 읽기 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void btnQuickAdd_Click(object sender, EventArgs e)

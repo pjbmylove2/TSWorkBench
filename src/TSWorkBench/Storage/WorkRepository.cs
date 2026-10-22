@@ -70,7 +70,8 @@ namespace TSWorkBench.Storage
         {
             var head = prefix + "-" + received.ToString("yyyy-MM", CultureInfo.InvariantCulture) + "-";
             var max = 0;
-            foreach (var id in items.Select(i => i.Id).Concat(ExistingFolderNames(received.Year)))
+            var used = items.Select(i => i.Id).Concat(items.SelectMany(i => i.PreviousIds)).Concat(ExistingFolderNames(received.Year));
+            foreach (var id in used)
             {
                 int n;
                 if (id.StartsWith(head, StringComparison.OrdinalIgnoreCase)
@@ -106,6 +107,65 @@ namespace TSWorkBench.Storage
             {
                 items.Add(item);
             }
+        }
+
+        /// <summary>ID의 연·월 부분. 새 형식 TS-2026-06-0003 → "2026-06", 예전 형식 TS-2026-0001 → "2026".</summary>
+        public static string IdMonth(string id)
+        {
+            var parts = (id ?? "").Split('-');
+            if (parts.Length >= 4)
+            {
+                return parts[1] + "-" + parts[2];
+            }
+
+            return parts.Length == 3 ? parts[1] : "";
+        }
+
+        /// <summary>ID의 연·월(예전 형식은 연도)이 접수 일시와 같은지. ID가 없으면 true.</summary>
+        public static bool IdMatchesReceived(WorkItem item)
+        {
+            if (string.IsNullOrEmpty(item.Id))
+            {
+                return true;
+            }
+
+            var month = IdMonth(item.Id);
+            var expected = month.Length == 4
+                ? item.ReceivedAt.ToString("yyyy", CultureInfo.InvariantCulture)
+                : item.ReceivedAt.ToString("yyyy-MM", CultureInfo.InvariantCulture);
+            return month == expected;
+        }
+
+        /// <summary>
+        /// 업무 ID를 바꾼다. 업무 폴더를 첨부째 새 ID 폴더로 옮기고 새 위치에 저장한다.
+        /// 예전 ID는 PreviousIds에 남겨 그 번호를 다시 쓰지 않게 한다.
+        /// </summary>
+        public void ChangeId(WorkItem item, string newId)
+        {
+            var oldId = item.Id;
+            var oldFolder = FolderOf(item);
+            var newFolder = Path.Combine(itemsDir, YearOf(newId), newId);
+            if (Directory.Exists(newFolder))
+            {
+                throw new IOException("같은 ID 폴더가 이미 있습니다: " + newFolder);
+            }
+
+            if (Directory.Exists(oldFolder))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(newFolder));
+                Directory.Move(oldFolder, newFolder);
+            }
+
+            items.RemoveAll(i => i.Id == oldId);
+            item.Id = newId;
+            if (!item.PreviousIds.Contains(oldId))
+            {
+                item.PreviousIds.Add(oldId);
+            }
+
+            item.UpdatedAt = DateTime.Now;
+            JsonFile.WriteAtomic(Path.Combine(newFolder, ItemFileName), item);
+            items.Add(item);
         }
 
         /// <summary>폴더째 Trash로 옮긴다. 완전히 지우지 않는다.</summary>

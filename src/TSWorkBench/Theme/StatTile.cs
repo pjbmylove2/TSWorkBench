@@ -75,8 +75,8 @@ namespace TSWorkBench.Theme
             var g = e.Graphics;
             g.Clear(hover ? DarkTheme.Selection : BackColor);
             using (var bar = new SolidBrush(barColor))
-            using (var captionFont = new Font(DarkTheme.FontName, 9.5f))
-            using (var valueFont = new Font(DarkTheme.FontName, 24f, FontStyle.Bold))
+            using (var captionFont = FontManager.CreateFont(9.5f))
+            using (var valueFont = FontManager.CreateFont(24f, FontStyle.Bold))
             using (var mutedBrush = new SolidBrush(DarkTheme.Muted))
             using (var textBrush = new SolidBrush(ForeColor))
             {

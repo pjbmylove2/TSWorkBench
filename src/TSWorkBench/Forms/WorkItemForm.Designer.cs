@@ -28,10 +28,13 @@ namespace TSWorkBench.Forms
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.pnlSummary = new System.Windows.Forms.Panel();
             this.tblSummary = new System.Windows.Forms.TableLayoutPanel();
             this.lblIdCap = new System.Windows.Forms.Label();
+            this.flpId = new System.Windows.Forms.FlowLayoutPanel();
             this.lblId = new System.Windows.Forms.Label();
+            this.btnReassign = new TSWorkBench.Theme.DarkButton();
             this.lblTitleCap = new System.Windows.Forms.Label();
             this.txtTitle = new System.Windows.Forms.TextBox();
             this.lblTypeCap = new System.Windows.Forms.Label();
@@ -148,12 +151,17 @@ namespace TSWorkBench.Forms
             this.btnSave = new TSWorkBench.Theme.DarkButton();
             this.btnAdvance = new TSWorkBench.Theme.DarkButton();
             this.btnStatus = new TSWorkBench.Theme.DarkButton();
+            this.btnSimilar = new TSWorkBench.Theme.DarkButton();
+            this.btnDeploy = new TSWorkBench.Theme.DarkButton();
+            this.lblSaved = new System.Windows.Forms.Label();
+            this.savedTimer = new System.Windows.Forms.Timer(this.components);
             this.flpBottomRight = new System.Windows.Forms.FlowLayoutPanel();
             this.btnClose = new TSWorkBench.Theme.DarkButton();
             this.btnFolder = new TSWorkBench.Theme.DarkButton();
             this.btnNotion = new TSWorkBench.Theme.DarkButton();
             this.btnReport = new TSWorkBench.Theme.DarkButton();
             this.pnlSummary.SuspendLayout();
+            this.flpId.SuspendLayout();
             this.tblSummary.SuspendLayout();
             this.pnlSectionNav.SuspendLayout();
             this.flpSections.SuspendLayout();
@@ -199,7 +207,7 @@ namespace TSWorkBench.Forms
             this.tblSummary.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 90F));
             this.tblSummary.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tblSummary.Controls.Add(this.lblIdCap, 0, 0);
-            this.tblSummary.Controls.Add(this.lblId, 1, 0);
+            this.tblSummary.Controls.Add(this.flpId, 1, 0);
             this.tblSummary.Controls.Add(this.lblTitleCap, 2, 0);
             this.tblSummary.Controls.Add(this.txtTitle, 3, 0);
             this.tblSummary.Controls.Add(this.lblTypeCap, 0, 1);
@@ -247,12 +255,31 @@ namespace TSWorkBench.Forms
             //
             // lblId
             //
-            this.lblId.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblId.AutoSize = true;
+            this.lblId.Margin = new System.Windows.Forms.Padding(0, 9, 6, 0);
             this.lblId.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
             this.lblId.ForeColor = System.Drawing.Color.RosyBrown;
             this.lblId.Name = "lblId";
             this.lblId.Text = "(저장 시 부여)";
-            this.lblId.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // flpId
+            //
+            this.flpId.Controls.Add(this.lblId);
+            this.flpId.Controls.Add(this.btnReassign);
+            this.flpId.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flpId.Margin = new System.Windows.Forms.Padding(0);
+            this.flpId.Name = "flpId";
+            this.flpId.WrapContents = false;
+            //
+            // btnReassign
+            //
+            this.btnReassign.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            this.btnReassign.Margin = new System.Windows.Forms.Padding(0, 8, 0, 0);
+            this.btnReassign.Name = "btnReassign";
+            this.btnReassign.Size = new System.Drawing.Size(84, 26);
+            this.btnReassign.TabStop = false;
+            this.btnReassign.Text = "ID 다시 부여";
+            this.btnReassign.Click += new System.EventHandler(this.btnReassign_Click);
             //
             // lblTitleCap
             //
@@ -1389,6 +1416,9 @@ namespace TSWorkBench.Forms
             this.flpBottomLeft.Controls.Add(this.btnSave);
             this.flpBottomLeft.Controls.Add(this.btnAdvance);
             this.flpBottomLeft.Controls.Add(this.btnStatus);
+            this.flpBottomLeft.Controls.Add(this.btnSimilar);
+            this.flpBottomLeft.Controls.Add(this.btnDeploy);
+            this.flpBottomLeft.Controls.Add(this.lblSaved);
             this.flpBottomLeft.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flpBottomLeft.Name = "flpBottomLeft";
             this.flpBottomLeft.TabIndex = 0;
@@ -1409,7 +1439,7 @@ namespace TSWorkBench.Forms
             //
             this.btnAdvance.Margin = new System.Windows.Forms.Padding(0, 0, 8, 0);
             this.btnAdvance.Name = "btnAdvance";
-            this.btnAdvance.Size = new System.Drawing.Size(220, 38);
+            this.btnAdvance.Size = new System.Drawing.Size(190, 38);
             this.btnAdvance.TabIndex = 1;
             this.btnAdvance.Text = "▶ 다음 단계";
             this.btnAdvance.Click += new System.EventHandler(this.btnAdvance_Click);
@@ -1423,6 +1453,37 @@ namespace TSWorkBench.Forms
             this.btnStatus.Text = "상태 변경 ▾";
             this.btnStatus.Click += new System.EventHandler(this.btnStatus_Click);
             //
+            // btnSimilar
+            //
+            this.btnSimilar.Margin = new System.Windows.Forms.Padding(0, 0, 8, 0);
+            this.btnSimilar.Name = "btnSimilar";
+            this.btnSimilar.Size = new System.Drawing.Size(140, 38);
+            this.btnSimilar.TabIndex = 3;
+            this.btnSimilar.Text = "유사 사례";
+            this.btnSimilar.Click += new System.EventHandler(this.btnSimilar_Click);
+            //
+            // btnDeploy
+            //
+            this.btnDeploy.Margin = new System.Windows.Forms.Padding(0, 0, 8, 0);
+            this.btnDeploy.Name = "btnDeploy";
+            this.btnDeploy.Size = new System.Drawing.Size(130, 38);
+            this.btnDeploy.TabIndex = 4;
+            this.btnDeploy.Text = "배포 기록";
+            this.btnDeploy.Click += new System.EventHandler(this.btnDeploy_Click);
+            //
+            // lblSaved
+            //
+            this.lblSaved.AutoSize = true;
+            this.lblSaved.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(204)))), ((int)(((byte)(113)))));
+            this.lblSaved.Margin = new System.Windows.Forms.Padding(4, 11, 0, 0);
+            this.lblSaved.Name = "lblSaved";
+            this.lblSaved.TabIndex = 5;
+            //
+            // savedTimer
+            //
+            this.savedTimer.Interval = 4000;
+            this.savedTimer.Tick += new System.EventHandler(this.savedTimer_Tick);
+            //
             // flpBottomRight
             //
             this.flpBottomRight.Controls.Add(this.btnClose);
@@ -1432,7 +1493,7 @@ namespace TSWorkBench.Forms
             this.flpBottomRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.flpBottomRight.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
             this.flpBottomRight.Name = "flpBottomRight";
-            this.flpBottomRight.Size = new System.Drawing.Size(560, 40);
+            this.flpBottomRight.Size = new System.Drawing.Size(500, 40);
             this.flpBottomRight.TabIndex = 1;
             this.flpBottomRight.WrapContents = false;
             //
@@ -1476,19 +1537,21 @@ namespace TSWorkBench.Forms
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(1180, 860);
+            this.ClientSize = new System.Drawing.Size(1320, 880);
             this.Controls.Add(this.pnlBody);
             this.Controls.Add(this.pnlSectionNav);
             this.Controls.Add(this.pnlSummary);
             this.Controls.Add(this.pnlBottom);
             this.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
             this.KeyPreview = true;
-            this.MinimumSize = new System.Drawing.Size(1000, 720);
+            this.MinimumSize = new System.Drawing.Size(1340, 780);
             this.Name = "WorkItemForm";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "업무 카드";
             this.pnlSummary.ResumeLayout(false);
+            this.flpId.ResumeLayout(false);
+            this.flpId.PerformLayout();
             this.tblSummary.ResumeLayout(false);
             this.tblSummary.PerformLayout();
             this.pnlSectionNav.ResumeLayout(false);
@@ -1516,6 +1579,7 @@ namespace TSWorkBench.Forms
             this.flpAttachTools.ResumeLayout(false);
             this.pnlBottom.ResumeLayout(false);
             this.flpBottomLeft.ResumeLayout(false);
+            this.flpBottomLeft.PerformLayout();
             this.flpBottomRight.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -1526,7 +1590,9 @@ namespace TSWorkBench.Forms
         private System.Windows.Forms.Panel pnlSummary;
         private System.Windows.Forms.TableLayoutPanel tblSummary;
         private System.Windows.Forms.Label lblIdCap;
+        private System.Windows.Forms.FlowLayoutPanel flpId;
         private System.Windows.Forms.Label lblId;
+        private TSWorkBench.Theme.DarkButton btnReassign;
         private System.Windows.Forms.Label lblTitleCap;
         private System.Windows.Forms.TextBox txtTitle;
         private System.Windows.Forms.Label lblTypeCap;
@@ -1643,6 +1709,10 @@ namespace TSWorkBench.Forms
         private TSWorkBench.Theme.DarkButton btnSave;
         private TSWorkBench.Theme.DarkButton btnAdvance;
         private TSWorkBench.Theme.DarkButton btnStatus;
+        private TSWorkBench.Theme.DarkButton btnSimilar;
+        private TSWorkBench.Theme.DarkButton btnDeploy;
+        private System.Windows.Forms.Label lblSaved;
+        private System.Windows.Forms.Timer savedTimer;
         private System.Windows.Forms.FlowLayoutPanel flpBottomRight;
         private TSWorkBench.Theme.DarkButton btnClose;
         private TSWorkBench.Theme.DarkButton btnFolder;
