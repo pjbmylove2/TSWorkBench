@@ -20,6 +20,11 @@ namespace TSWorkBench.Forms
         private readonly WorkItem card;
         private PendingInfo pending;
 
+        // 배포는 백그라운드에서 돌고 취소할 수 없으므로, 도는 동안에는 창을 닫지 못하게 한다.
+        private bool running;
+        private DateTime startedAt;
+        private ReleaseProgress current;
+
         public NewReleaseDialog()
         {
             InitializeComponent();
@@ -245,21 +250,27 @@ namespace TSWorkBench.Forms
             }
 
             btnOk.Enabled = false;
+            SetRunning(true);
             Cursor = Cursors.WaitCursor;
             try
             {
                 var progress = new Progress<string>(Log);
+                var status = new Progress<ReleaseProgress>(ShowProgress);
                 var service = new ProgramService(ws);
                 ReleaseRecord record = null;
-                var line = await Task.Run(() => service.NewRelease(request, progress, out record));
+                var line = await Task.Run(() => service.NewRelease(request, progress, out record, status));
                 ResultLine = line;
                 Record = record;
+                SetRunning(false);
+                ShowFinished(true, "✔ 배포를 마쳤습니다");
                 MessageBox.Show(this, p.Name + " v" + record.Version + " 배포를 마쳤습니다.\n\n배포본: " + record.PackagePath
                                       + "\n설치 기록: " + request.Targets.Count + "곳", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
             {
+                SetRunning(false);
+                ShowFinished(false, "✖ 실패" + (current != null ? " — " + current.Title + " 단계" : ""));
                 Log("✖ " + ex.Message);
                 ItemActions.ShowError(this, "새 버전 배포", ex);
                 btnOk.Enabled = true;
@@ -268,6 +279,98 @@ namespace TSWorkBench.Forms
             {
                 Cursor = Cursors.Default;
             }
+        }
+
+        private void SetRunning(bool value)
+        {
+            running = value;
+            btnClose.Enabled = !value;
+            btnRefresh.Enabled = !value;
+            cboProgram.Enabled = !value;
+            if (value)
+            {
+                startedAt = DateTime.Now;
+                current = null;
+                lblCurrent.ForeColor = DarkTheme.Text;
+                lblCurrent.Text = "시작하는 중…";
+                prgStep.Style = ProgressBarStyle.Marquee;
+                pnlProgress.Visible = true;
+                elapsedTimer.Start();
+            }
+            else
+            {
+                elapsedTimer.Stop();
+            }
+        }
+
+        private void ShowProgress(ReleaseProgress p)
+        {
+            if (!running)
+            {
+                return;
+            }
+
+            current = p;
+            if (p.Total > 0)
+            {
+                prgStep.Style = ProgressBarStyle.Continuous;
+                prgStep.Maximum = p.Total;
+                prgStep.Value = Math.Min(p.Done, p.Total);
+            }
+            else
+            {
+                prgStep.Style = ProgressBarStyle.Marquee;
+            }
+
+            UpdateCurrent();
+        }
+
+        private void UpdateCurrent()
+        {
+            var text = current == null ? "시작하는 중…" : "단계 " + current.Step + "/" + ReleaseProgress.StepCount + " · " + current.Title;
+            if (current != null && current.Detail.Length > 0)
+            {
+                text += " › " + current.Detail;
+            }
+
+            if (current != null && current.Total > 0)
+            {
+                text += "  " + current.Done.ToString("N0") + " / " + current.Total.ToString("N0") + " 파일";
+            }
+
+            lblCurrent.Text = text + "   (경과 " + Elapsed() + ")";
+        }
+
+        private void ShowFinished(bool ok, string text)
+        {
+            prgStep.Style = ProgressBarStyle.Continuous;
+            prgStep.Maximum = 1;
+            prgStep.Value = ok ? 1 : 0;
+            lblCurrent.ForeColor = ok ? DarkTheme.Text : DarkTheme.Danger;
+            lblCurrent.Text = text + "   (걸린 시간 " + Elapsed() + ")";
+        }
+
+        private string Elapsed()
+        {
+            var t = DateTime.Now - startedAt;
+            return ((int)t.TotalMinutes).ToString("00") + ":" + t.Seconds.ToString("00");
+        }
+
+        private void elapsedTimer_Tick(object sender, EventArgs e)
+        {
+            UpdateCurrent();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (running && e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                MessageBox.Show(this, "배포가 진행 중입니다" + (current != null ? " (" + current.Title + ")" : "") + ".\n\n"
+                                      + "창을 닫아도 작업은 멈추지 않으므로, 끝날 때까지 기다려 주세요.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            base.OnFormClosing(e);
         }
 
         private static bool Same(string a, string b)

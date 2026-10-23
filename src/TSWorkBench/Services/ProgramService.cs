@@ -74,6 +74,20 @@ namespace TSWorkBench.Services
         public string SkipCardId { get; set; } = "";
     }
 
+    /// <summary>새 버전 배포의 지금 단계 (화면의 '현재 작업' 줄).</summary>
+    public sealed class ReleaseProgress
+    {
+        public const int StepCount = 5;
+
+        public int Step { get; set; }
+        public string Title { get; set; } = "";
+        public string Detail { get; set; } = "";
+        public int Done { get; set; }
+
+        /// <summary>0이면 개수를 모르는 작업 (막대가 흐르기만 한다).</summary>
+        public int Total { get; set; }
+    }
+
     /// <summary>
     /// 프로그램 버전 관리의 모든 Git 작업을 버튼 하나로 대신한다.
     /// ① 등록(기준본) ② 새 버전 배포 ③ 과거 버전 가져오기 + 설치 현황, NAS 백업.
@@ -360,8 +374,13 @@ namespace TSWorkBench.Services
         /// 새 버전 배포: HEAD에 태그 → 보관소에 배포본(빌드 zip + 소스 zip + 매뉴얼 + 변경 내역) → 배포 기록·설치 기록
         /// → 관련 업무 카드 '변경 내역'에 자동 기입 → NAS 백업. 업무 카드에 적을 한 줄을 돌려준다.
         /// </summary>
-        public string NewRelease(NewReleaseRequest r, IProgress<string> log, out ReleaseRecord record)
+        public string NewRelease(NewReleaseRequest r, IProgress<string> log, out ReleaseRecord record, IProgress<ReleaseProgress> status = null)
         {
+            void Step(int step, string title, string detail = "", int done = 0, int total = 0)
+            {
+                status?.Report(new ReleaseProgress { Step = step, Title = title, Detail = detail, Done = done, Total = total });
+            }
+
             var p = ws.FindProgram(r.Program) ?? throw new InvalidOperationException("등록되지 않은 프로그램입니다: " + r.Program);
             var git = Git(p);
             if (!git.HasCommits)
@@ -404,12 +423,14 @@ namespace TSWorkBench.Services
             }
 
             var head = git.Head();
+            Step(1, "이름표 붙이기", tag);
             Report(log, "이름표 " + tag + " → 커밋 " + head.Hash + " (" + head.Subject + ")");
             git.Tag(tag, p.Name + " " + version + "\n\n" + r.Notes, null, null);
 
             string package;
             try
             {
+                Step(2, "배포본 만들기");
                 Report(log, "배포본 만들기 (빌드 zip + 소스 zip + 매뉴얼)…");
                 package = ReleasePackager.Create(ws.Settings.ReleaseStore, new PackageRequest
                 {
@@ -418,7 +439,8 @@ namespace TSWorkBench.Services
                     BuildFolder = Directory.Exists(p.BuildFolder) ? p.BuildFolder : "",
                     ManualFolder = p.ManualFolder,
                     Notes = r.Notes,
-                    WriteSourceZip = zip => git.Archive(tag, zip)
+                    WriteSourceZip = zip => git.Archive(tag, zip),
+                    Progress = (what, done, total) => Step(2, "배포본 만들기", what, done, total)
                 }, DateTime.Now).PackagePath;
             }
             catch
@@ -447,8 +469,11 @@ namespace TSWorkBench.Services
                 record.Deployments.Add(t);
             }
 
+            Step(3, "배포 기록 저장");
             ws.Releases.Save(record);
             Report(log, "배포 기록 저장, 설치 위치 " + r.Targets.Count + "곳");
+
+            Step(4, "업무 카드 기록");
 
             var line = "배포: " + p.Name + " v" + version + " (커밋 " + head.Hash + ")"
                        + (r.Targets.Count > 0 ? " → " + string.Join(", ", r.Targets.Select(t => t.Equipment.Length > 0 ? t.Equipment : t.Site)) : "")
@@ -466,6 +491,7 @@ namespace TSWorkBench.Services
                 Report(log, "업무 카드 " + id + " 변경 내역에 기록");
             }
 
+            Step(5, "NAS로 코드 백업", p.HasRemote ? p.GitRemote : "백업 위치 없음 — 건너뜀");
             Backup(p, git, log);
             return line;
         }

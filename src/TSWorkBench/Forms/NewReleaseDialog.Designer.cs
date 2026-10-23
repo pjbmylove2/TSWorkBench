@@ -28,6 +28,7 @@ namespace TSWorkBench.Forms
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.lblHint = new System.Windows.Forms.Label();
             this.tbl = new System.Windows.Forms.TableLayoutPanel();
             this.lblProgram = new System.Windows.Forms.Label();
@@ -57,6 +58,11 @@ namespace TSWorkBench.Forms
             this.dateDeployedAt = new TSWorkBench.Theme.DateBox();
             this.lblLog = new System.Windows.Forms.Label();
             this.txtLog = new System.Windows.Forms.TextBox();
+            this.pnlLog = new System.Windows.Forms.Panel();
+            this.pnlProgress = new System.Windows.Forms.Panel();
+            this.lblCurrent = new System.Windows.Forms.Label();
+            this.prgStep = new System.Windows.Forms.ProgressBar();
+            this.elapsedTimer = new System.Windows.Forms.Timer(this.components);
             this.flpButtons = new System.Windows.Forms.FlowLayoutPanel();
             this.btnClose = new TSWorkBench.Theme.DarkButton();
             this.btnOk = new TSWorkBench.Theme.DarkButton();
@@ -65,6 +71,8 @@ namespace TSWorkBench.Forms
             this.flpStep.SuspendLayout();
             this.pnlSites.SuspendLayout();
             this.flpAddSite.SuspendLayout();
+            this.pnlLog.SuspendLayout();
+            this.pnlProgress.SuspendLayout();
             this.flpButtons.SuspendLayout();
             this.SuspendLayout();
             //
@@ -99,7 +107,7 @@ namespace TSWorkBench.Forms
             this.tbl.Controls.Add(this.lblDeployedAt, 0, 7);
             this.tbl.Controls.Add(this.dateDeployedAt, 1, 7);
             this.tbl.Controls.Add(this.lblLog, 0, 8);
-            this.tbl.Controls.Add(this.txtLog, 1, 8);
+            this.tbl.Controls.Add(this.pnlLog, 1, 8);
             this.tbl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tbl.Name = "tbl";
             this.tbl.RowCount = 9;
@@ -366,6 +374,49 @@ namespace TSWorkBench.Forms
             this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtLog.TabIndex = 7;
             //
+            // pnlLog
+            //
+            this.pnlLog.Controls.Add(this.txtLog);
+            this.pnlLog.Controls.Add(this.pnlProgress);
+            this.pnlLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlLog.Margin = new System.Windows.Forms.Padding(3, 7, 3, 3);
+            this.pnlLog.Name = "pnlLog";
+            this.pnlLog.TabIndex = 7;
+            //
+            // pnlProgress
+            //
+            this.pnlProgress.Controls.Add(this.prgStep);
+            this.pnlProgress.Controls.Add(this.lblCurrent);
+            this.pnlProgress.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlProgress.Name = "pnlProgress";
+            this.pnlProgress.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
+            this.pnlProgress.Size = new System.Drawing.Size(700, 46);
+            this.pnlProgress.TabIndex = 0;
+            this.pnlProgress.Visible = false;
+            //
+            // lblCurrent
+            //
+            this.lblCurrent.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblCurrent.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            this.lblCurrent.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(236)))), ((int)(((byte)(236)))), ((int)(((byte)(236)))));
+            this.lblCurrent.Name = "lblCurrent";
+            this.lblCurrent.Size = new System.Drawing.Size(700, 24);
+            this.lblCurrent.Text = "현재 작업";
+            this.lblCurrent.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // prgStep
+            //
+            this.prgStep.Dock = System.Windows.Forms.DockStyle.Top;
+            this.prgStep.MarqueeAnimationSpeed = 30;
+            this.prgStep.Name = "prgStep";
+            this.prgStep.Size = new System.Drawing.Size(700, 12);
+            this.prgStep.TabIndex = 0;
+            //
+            // elapsedTimer
+            //
+            this.elapsedTimer.Interval = 1000;
+            this.elapsedTimer.Tick += new System.EventHandler(this.elapsedTimer_Tick);
+            //
             // flpButtons
             //
             this.flpButtons.Controls.Add(this.btnClose);
@@ -429,6 +480,9 @@ namespace TSWorkBench.Forms
             this.flpStep.PerformLayout();
             this.pnlSites.ResumeLayout(false);
             this.flpAddSite.ResumeLayout(false);
+            this.pnlLog.ResumeLayout(false);
+            this.pnlLog.PerformLayout();
+            this.pnlProgress.ResumeLayout(false);
             this.flpButtons.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -465,6 +519,11 @@ namespace TSWorkBench.Forms
         private TSWorkBench.Theme.DateBox dateDeployedAt;
         private System.Windows.Forms.Label lblLog;
         private System.Windows.Forms.TextBox txtLog;
+        private System.Windows.Forms.Panel pnlLog;
+        private System.Windows.Forms.Panel pnlProgress;
+        private System.Windows.Forms.Label lblCurrent;
+        private System.Windows.Forms.ProgressBar prgStep;
+        private System.Windows.Forms.Timer elapsedTimer;
         private System.Windows.Forms.FlowLayoutPanel flpButtons;
         private TSWorkBench.Theme.DarkButton btnClose;
         private TSWorkBench.Theme.DarkButton btnOk;

@@ -26,6 +26,9 @@ namespace TSWorkBench.Services
 
         /// <summary>소스 코드 zip을 주어진 경로에 쓰는 동작 (git archive). 없으면 소스 zip을 만들지 않는다.</summary>
         public Action<string> WriteSourceZip { get; set; }
+
+        /// <summary>진행 보고 (무엇을, 한 개수, 전체 개수). 전체가 0이면 개수를 모르는 작업. 없어도 된다.</summary>
+        public Action<string, int, int> Progress { get; set; }
     }
 
     /// <summary>
@@ -87,17 +90,23 @@ namespace TSWorkBench.Services
                 var stem = ReleaseRepository.SafeName(request.Program) + "_v" + ReleaseRepository.SafeName(request.Version);
                 if (hasBuild)
                 {
-                    ZipFolder(request.BuildFolder, Path.Combine(work, stem + ".zip"));
+                    ZipFolder(request.BuildFolder, Path.Combine(work, stem + ".zip"), request.Progress);
                 }
 
-                request.WriteSourceZip?.Invoke(Path.Combine(work, stem + "_source.zip"));
+                if (request.WriteSourceZip != null)
+                {
+                    request.Progress?.Invoke("소스 zip (git archive)", 0, 0);
+                    request.WriteSourceZip(Path.Combine(work, stem + "_source.zip"));
+                }
 
                 if (!string.IsNullOrWhiteSpace(request.ManualFolder) && Directory.Exists(request.ManualFolder))
                 {
+                    request.Progress?.Invoke("매뉴얼 복사", 0, 0);
                     CopyFolder(request.ManualFolder, Path.Combine(work, "manual"));
                 }
 
                 File.WriteAllText(Path.Combine(work, "RELEASE_NOTES.md"), ReleaseNotes(request, now), new UTF8Encoding(false));
+                request.Progress?.Invoke("SHA256 계산", 0, 0);
                 File.WriteAllText(Path.Combine(work, "SHA256SUMS.txt"), Checksums(work), new UTF8Encoding(false));
             }
             catch
@@ -133,18 +142,24 @@ namespace TSWorkBench.Services
                    + (string.IsNullOrWhiteSpace(r.Notes) ? "-" : r.Notes.Replace("\r\n", "\n").Trim()) + "\n";
         }
 
-        private static void ZipFolder(string folder, string zipPath)
+        private static void ZipFolder(string folder, string zipPath, Action<string, int, int> progress)
         {
+            var files = Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories)
+                .Where(file => !ExcludedExtensions.Any(e => file.EndsWith(e, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+            // 화면 갱신이 너무 잦지 않게 약 0.5%마다 보고한다.
+            var every = Math.Max(1, files.Count / 200);
+            progress?.Invoke("빌드 zip", 0, files.Count);
             using (var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create))
             {
-                foreach (var file in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
+                for (var i = 0; i < files.Count; i++)
                 {
-                    if (ExcludedExtensions.Any(e => file.EndsWith(e, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        continue;
-                    }
-
+                    var file = files[i];
                     zip.CreateEntryFromFile(file, file.Substring(folder.Length).TrimStart('\\', '/'), CompressionLevel.Optimal);
+                    if ((i + 1) % every == 0 || i + 1 == files.Count)
+                    {
+                        progress?.Invoke("빌드 zip", i + 1, files.Count);
+                    }
                 }
             }
         }
